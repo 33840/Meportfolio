@@ -1,0 +1,787 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哈尼风物集 | 作品详情 | Wang Yutong</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#111111',
+                        secondary: '#333333',
+                        accent: '#0066ff',
+                        light: '#f5f5f5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-balance {
+                text-wrap: balance;
+            }
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            .transition-transform {
+                transition-property: transform;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+                transition-duration: 300ms;
+            }
+            .hover-scale {
+                @apply hover:scale-105 transition-transform duration-300;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .nav-shadow {
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+        }
+    </style>
+    
+    <style>
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #bbb;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+        
+        /* 图片查看器样式 */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            flex-direction: row;
+        }
+        
+        .image-viewer.active {
+            display: flex;
+        }
+
+        .viewer-main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 60px 20px 20px 20px;
+        }
+
+        .viewer-main img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            display: block;
+            flex-shrink: 0;
+            transform-origin: center center;
+        }
+
+        .viewer-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
+            z-index: 10;
+        }
+        .viewer-nav:hover {
+            background: rgba(0,0,0,0.9);
+        }
+        .viewer-prev { left: 20px; }
+        .viewer-next { right: 20px; }
+        .viewer-nav.disabled, .viewer-nav.disabled:hover {
+            background: rgba(128,128,128,0.5) !important;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .viewer-sidebar {
+            width: 140px;
+            background: rgba(0,0,0,0.4);
+            padding: 50px 8px 8px 8px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            direction: rtl;
+            scrollbar-width: auto;
+            scrollbar-color: rgba(255,255,255,0.5) rgba(0,0,0,0.2);
+        }
+
+        /* 渚ц竟鏍忔粴鍔ㄦ潯鏍峰紡 */
+        .viewer-sidebar::-webkit-scrollbar {
+            width: 10px;
+        }
+        .viewer-sidebar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .viewer-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.5);
+            border-radius: 5px;
+            min-height: 30px;
+            border: 2px solid rgba(0,0,0,0.2);
+            background-clip: padding-box;
+        }
+        .viewer-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.75);
+            background-clip: padding-box;
+        }
+
+        .viewer-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 2px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s, transform 0.2s;
+            border: 1px solid transparent;
+            background: #222;
+        }
+        .viewer-thumb:hover {
+            opacity: 0.85;
+        }
+        .viewer-thumb.active {
+            opacity: 1;
+            border-color: #1e3a8a;
+            transform: scale(1.05);
+        }
+
+        .viewer-thumb-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            flex-shrink: 0;
+        }
+        .viewer-thumb-wrap .viewer-thumb {
+            width: 100%;
+            height: 100%;
+        }
+        .viewer-thumb-wrap .play-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+            pointer-events: none;
+        }
+
+        .viewer-main img.hidden {
+            display: none;
+        }
+
+        .image-viewer-close {
+            position: absolute;
+            top: 20px;
+            right: 200px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        /* 画板样式 */
+        #drawing-canvas {
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        /* 音量滑块样式 */
+        .volume-slider {
+            -webkit-appearance: slider-vertical;
+            writing-mode: vertical-lr;
+            direction: rtl;
+            width: 6px;
+            height: 80px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            outline: none;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .volume-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* 视频进度条样式 */
+        .progress-bar {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+        .progress-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .progress-bar::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        .color-btn {
+            cursor: pointer;
+        }
+        .color-btn.active-color {
+            border-color: #0066ff !important;
+            transform: scale(1.15);
+        }
+        #btn-eraser.active {
+            background: #0066ff !important;
+            color: white !important;
+        }
+        
+        /* 淡入动画 */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .fade-in.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* 禁止图片下载：禁止选中、禁止拖拽 */
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="text-primary font-sans" style="background-image: url('../img/BG3.png'); background-size: cover; background-position: center; background-attachment: fixed;">
+    <!-- 导航栏 -->
+    <nav id="navbar" class="fixed top-0 left-0 w-full bg-white bg-opacity-95 nav-shadow py-4 z-50">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold text-primary">Wang Yutong</a>
+                
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex ml-auto space-x-8">
+                    <a href="../index.html" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Home</a>
+                    <a href="../index.html#about" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">About</a>
+                    <a href="../index.html#works" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Portfolio</a>
+                    <a href="../index.html#contact" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Contact</a>
+                </div>
+                
+                <!-- 移动端菜单按钮 -->
+                <button id="menu-toggle" class="md:hidden ml-auto text-primary focus:outline-none">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="md:hidden bg-white hidden absolute top-full left-0 w-full border-t border-gray-100">
+            <div class="container mx-auto px-4 py-4">
+                <a href="../index.html" class="block py-2 text-secondary hover:text-accent">Home</a>
+                <a href="../index.html#about" class="block py-2 text-secondary hover:text-accent">About</a>
+                <a href="../index.html#works" class="block py-2 text-secondary hover:text-accent">Portfolio</a>
+                <a href="../index.html#contact" class="block py-2 text-secondary hover:text-accent">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="pt-16 pb-16">
+        <!-- 作品简介 -->
+        <section class="py-12">
+            <div class="container mx-auto px-4">
+                <div class="max-w-5xl mx-auto">
+                    <h1 class="text-4xl md:text-6xl font-bold text-primary mb-4">哈尼风物集</h1>
+                    <div class="flex flex-wrap gap-2 mb-8">
+                        <span class="px-4 py-2 bg-gray-100 rounded-full text-secondary text-sm">插画文创设计</span>
+                        <span class="px-4 py-2 bg-gray-100 rounded-full text-secondary text-sm">2025-2026</span>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-16 mb-8">
+                        <div class="md:w-2/3">
+                            <p class="text-gray-600 text-base text-justify text-justify-last:text-left" style="text-align: justify; text-align-last: left;">
+                                本套系列文创以哈尼族森林村寨梯田水系四素同构的生态智慧为核心，视觉脉络巧妙融合四季代表色，春日以浪漫粉色晕染新生之景，夏日用生机绿色铺成繁茂画面，秋日取灿烂黄色勾勒饱满质感，冬日借澄澈蓝色晕染清冽意境，四季的色彩与哈尼族独特的人居生态图景层层交融，既呈现出四素同构的和谐韵律，又通过季节色彩的更迭赋予文创鲜明的系列感与辨识度，让哈尼族世代传承的生态美学，在文创间鲜活流转。
+                            </p>
+                        </div>
+                        <div class="md:w-1/3">
+                            <h3 class="text-xl font-semibold mb-4">工具使用</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">Procreate</span>
+                                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">Adobe Illustrator</span>
+                                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">Adobe Photoshop</span>
+                                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">AIGC</span>
+                                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">剪映</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="gallery-section" class="flex flex-row overflow-x-auto gap-6 mt-8 pb-4 items-center">
+                            <img src="../img/3/zhanban1.jpg" alt="zhanban1" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/3/zhanban2.jpg" alt="zhanban2" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/3/zhanban3.jpg" alt="zhanban3" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/3/zhanban4.jpg" alt="zhanban4" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/3/zhanban5.jpg" alt="zhanban5" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/3/zuopin1.jpg" alt="zuopin1" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/3/zuopin2.jpg" alt="zuopin2" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/3/zuopin3.jpg" alt="zuopin3" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/3/zuopin4.jpg" alt="zuopin4" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                    </div>
+                    <div class="flex justify-center gap-4 mt-8">
+                        <a href="../index.html#portfolio" class="inline-flex items-center px-8 py-3 text-white font-medium border border-white rounded-md transition duration-300" style="background-image: url('../img/BGchakan.png'); background-size: cover; background-position: center;">
+                            <i class="fa fa-home mr-2"></i>回到首页
+                        </a>
+                        <a href="work4.html" class="inline-flex items-center px-8 py-3 bg-white text-black font-medium rounded-md transition duration-300">
+                            下一个作品
+                            <i class="fa fa-angle-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="py-12 bg-black text-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-2xl font-bold">Wang Yutong</h3>
+                    <p class="text-gray-400 mt-2">A designer crafting digital experiences.</p>
+                </div>
+                
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-behance text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-dribbble text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>© 2025 Wang Yutong. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 图片查看器 -->
+    <div id="image-viewer" class="image-viewer">
+        <span class="image-viewer-close" onclick="closeImageViewer()">×</span>
+        <div class="viewer-main" onclick="event.stopPropagation()">
+            <button class="viewer-nav viewer-prev" onclick="prevImage()" title="上一张">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+            <img id="viewer-image" src="" alt="Large image view">
+            <button class="viewer-nav viewer-next" onclick="nextImage()" title="下一张">
+                <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="viewer-sidebar" id="viewer-sidebar"></div>
+    </div>
+
+
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 移动端菜单切换
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // 导航栏滚动效果
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-white', 'shadow-md');
+                    navbar.classList.remove('bg-opacity-95');
+                } else {
+                    navbar.classList.remove('shadow-md');
+                    navbar.classList.add('bg-opacity-95');
+                }
+            });
+
+            // 淡入动画
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            const fadeInOnScroll = function() {
+                fadeElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (elementTop < windowHeight - 100) {
+                        element.classList.add('active');
+                    }
+                });
+            };
+            
+            // 初始检查
+            fadeInOnScroll();
+            
+            // 滚动时检查
+            window.addEventListener('scroll', fadeInOnScroll);
+            
+            // 使用 GSAP 添加更复杂的动画
+            if (typeof gsap !== 'undefined') {
+                // 简介区域动画
+                gsap.from('section:nth-of-type(1) p', {
+                    opacity: 0,
+                    y: 20,
+                    duration: 1,
+                    delay: 0.8
+                });
+                
+                // 主要图片动画
+                gsap.from('section:nth-of-type(2) img', {
+                    opacity: 0,
+                    scale: 0.9,
+                    duration: 1,
+                    delay: 1
+                });
+            }
+        });
+        
+        // 图片查看器功能
+        let viewerItems = [];
+        let viewerIndex = 0;
+        let viewerScale = 1;
+
+        function openImageViewer(e) {
+            const imgEl = e.target;
+            const container = imgEl.parentElement;
+            const images = Array.from(container.querySelectorAll('img'));
+
+            // 构建item列表
+            viewerItems = images.map(function(img) {
+                return { type: 'image', src: img.src };
+            });
+
+            viewerIndex = images.indexOf(imgEl);
+
+            const viewer = document.getElementById('image-viewer');
+            const viewerImage = document.getElementById('viewer-image');
+            const sidebar = document.getElementById('viewer-sidebar');
+
+            // 初始化显示
+            viewerImage.src = viewerItems[viewerIndex].src;
+            viewerScale = 1;
+            viewerImage.style.transform = 'scale(1)';
+
+            // 构建缩略图侧边栏
+            sidebar.innerHTML = '';
+            viewerItems.forEach(function(item, i) {
+                const wrap = document.createElement('div');
+                wrap.className = 'viewer-thumb-wrap';
+
+                const thumb = document.createElement('img');
+                thumb.src = item.src;
+                thumb.className = 'viewer-thumb';
+                wrap.appendChild(thumb);
+
+                if (i === viewerIndex) {
+                    wrap.querySelector('.viewer-thumb').classList.add('active');
+                }
+                wrap.onclick = function() { viewerIndex = i; showViewerItem(); };
+                sidebar.appendChild(wrap);
+            });
+
+            viewer.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            requestAnimationFrame(function() {
+                const activeWrap = sidebar.children[viewerIndex];
+                if (activeWrap) {
+                    activeWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        }
+        
+        function showViewerItem() {
+            const viewerImage = document.getElementById('viewer-image');
+            const sidebar = document.getElementById('viewer-sidebar');
+            const item = viewerItems[viewerIndex];
+
+            viewerImage.src = item.src;
+            viewerScale = 1;
+            viewerImage.style.transform = 'scale(1)';
+
+            // 更新缩略图高亮
+            const thumbs = sidebar.querySelectorAll('.viewer-thumb');
+            thumbs.forEach(function(thumb, i) {
+                thumb.classList.toggle('active', i === viewerIndex);
+            });
+            // update nav button state
+            const prevBtn = document.querySelector('.viewer-prev');
+            const nextBtn = document.querySelector('.viewer-next');
+            if (prevBtn) prevBtn.classList.toggle('disabled', viewerIndex === 0);
+            if (nextBtn) nextBtn.classList.toggle('disabled', viewerIndex === viewerItems.length - 1);
+        }
+        
+        function prevImage() {
+            if (viewerIndex > 0) {
+                viewerIndex--;
+                showViewerItem();
+            }
+        }
+        
+        function nextImage() {
+            if (viewerIndex < viewerItems.length - 1) {
+                viewerIndex++;
+                showViewerItem();
+            }
+        }
+        
+        function closeImageViewer() {
+            const viewer = document.getElementById('image-viewer');
+            viewer.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // 点击图片查看器背景关闭
+        document.getElementById('image-viewer').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImageViewer();
+            }
+        });
+        
+        // 键盘导航支持
+        document.addEventListener('keydown', function(e) {
+            const viewer = document.getElementById('image-viewer');
+            if (viewer.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    closeImageViewer();
+                } else if (e.key === 'ArrowLeft') {
+                    prevImage();
+                } else if (e.key === 'ArrowRight') {
+                    nextImage();
+                }
+            }
+        });
+
+        // ===== 画板功能 =====
+        let canvas, ctx;
+        let isDrawing = false;
+        let currentColor = '#1a1a1a';
+        let currentSize = 3;
+        let isEraser = false;
+        let lastX = 0, lastY = 0;
+
+        function openFloatingPage() {
+            const board = document.getElementById('floating-page');
+            if (!board) return;
+            board.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            // 初始化 canvas
+            requestAnimationFrame(() => {
+                canvas = document.getElementById('drawing-canvas');
+                ctx = canvas.getContext('2d');
+                resizeCanvas();
+
+                // 白色背景
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+            });
+        }
+
+        function closeFloatingPage() {
+            const board = document.getElementById('floating-page');
+            if (!board) return;
+            board.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+
+            // 保存现有内容
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            tempCanvas.getContext('2d').drawImage(canvas, 0, 0);
+
+            // 设置新尺寸
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+
+            // 恢复内容（白底 + 原有内容）
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(tempCanvas, 0, 0);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startDraw(e) {
+            isDrawing = true;
+            const pos = getPos(e);
+            lastX = pos.x; lastY = pos.y;
+            // 单击也能画点
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, currentSize / 2, 0, Math.PI * 2);
+            ctx.fillStyle = isEraser ? '#ffffff' : currentColor;
+            ctx.fill();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const pos = getPos(e);
+            ctx.strokeStyle = isEraser ? '#ffffff' : currentColor;
+            ctx.lineWidth = isEraser ? currentSize * 3 : currentSize;
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            lastX = pos.x; lastY = pos.y;
+        }
+
+        function stopDraw() { isDrawing = false; }
+
+        
+
+           
+            // 窗口缩放时调整 canvas
+            window.addEventListener('resize', function() {
+                const board = document.getElementById('floating-page');
+                if (board && !board.classList.contains('hidden')) {
+                    resizeCanvas();
+                }
+            });
+    </script>
+
+
+    <!-- 禁止图片下载：右键菜单、拖拽、快捷键、开发者工具 -->
+    <script>
+    (function() {
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && (e.key === 's' || e.key === 'S')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); return false; }
+            if (e.key === 'F12') { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
+        });
+        function setImgNotDraggable() {
+            document.querySelectorAll('img').forEach(function(img) {
+                img.setAttribute('draggable', 'false');
+                img.setAttribute('oncontextmenu', 'return false');
+                img.setAttribute('ondragstart', 'return false');
+            });
+        }
+        setImgNotDraggable();
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) {
+                        if (node.tagName === 'IMG') {
+                            node.setAttribute('draggable', 'false');
+                            node.setAttribute('oncontextmenu', 'return false');
+                            node.setAttribute('ondragstart', 'return false');
+                        }
+                        node.querySelectorAll && node.querySelectorAll('img').forEach(function(img) {
+                            img.setAttribute('draggable', 'false');
+                            img.setAttribute('oncontextmenu', 'return false');
+                            img.setAttribute('ondragstart', 'return false');
+                        });
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    })();
+    </script>
+</body></html>

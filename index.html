@@ -1,0 +1,1074 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设计师作品集 | Wang Yutong</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#111111',
+                        secondary: '#333333',
+                        accent: '#0066ff',
+                        light: '#f5f5f5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    transitionProperty: {
+                        'height': 'height',
+                        'spacing': 'margin, padding',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-balance {
+                text-wrap: balance;
+            }
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            .transition-transform {
+                transition-property: transform;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+                transition-duration: 300ms;
+            }
+            .hover-scale {
+                @apply hover:scale-105 transition-transform duration-300;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .nav-shadow {
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+        }
+    </style>
+    
+    <style>
+        /* 自定义滚动区域的自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* 平滑区域的动画 */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        .fade-in.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 元素逐个淡入 */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+
+        /* 作品卡片悬停效果 */
+        .work-card {
+            transition: all 0.3s ease;
+        }
+        
+        .work-card:hover .work-overlay {
+            opacity: 1;
+        }
+        
+        .work-overlay {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        /* —— 全局 section 背景过渡体系 —— */
+        
+        /* 1. Hero 区（BG1：纯白）底部 → About 区（BG2：米灰）顶部：200px 多段平滑渐变 */
+        #home {
+            position: relative;
+            background-color: #ffffff;
+        }
+        #home::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                rgba(245, 242, 238, 0.35) 25%,
+                rgba(240, 237, 232, 0.65) 50%,
+                rgba(237, 233, 226, 0.88) 75%,
+                rgba(237, 233, 226, 1) 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        /* 2. About 区（BG2）底部 → Portfolio 区（BG2）顶部：
+           同一张图但 cover 裁剪不同，用 150px 双向渐变抹平差异 */
+        #about {
+            position: relative;
+        }
+        #about::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                rgba(237, 233, 226, 0.5) 40%,
+                rgba(237, 233, 226, 1) 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        #portfolio {
+            position: relative;
+        }
+        #portfolio::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(to bottom,
+                rgba(237, 233, 226, 1) 0%,
+                rgba(237, 233, 226, 0.5) 60%,
+                transparent 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        /* 3. Portfolio 区（BG2）底部 → Contact 区（BG3：暖白）顶部：
+           米灰→暖白过渡，中间色稍调浅 */
+        #portfolio::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                rgba(241, 238, 233, 0.5) 40%,
+                rgba(244, 242, 238, 1) 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        #contact {
+            position: relative;
+            background-color: #f4f2ee;
+        }
+        #contact::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(to bottom,
+                rgba(244, 242, 238, 1) 0%,
+                rgba(244, 242, 238, 0.5) 60%,
+                transparent 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        /* 导航栏滚动效果 */
+        .navbar-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* 简历图片查看器（与作品页图片查看器样式/操作一致） */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+        }
+        .image-viewer.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .viewer-main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 60px 20px 20px 20px;
+        }
+        .viewer-main img {
+            max-width: 70%;
+            max-height: 75vh;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+        .image-viewer-close {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        /* 禁止图片下载：禁止选中、禁止拖拽 */
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="bg-white text-primary font-sans">
+    <!-- 导航栏 -->
+    <nav id="navbar" class="navbar-fixed bg-white bg-opacity-95 nav-shadow py-4">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="flex justify-between-between items-center">
+                <a href="#" class="text-2xl font-bold text-primary">Wang Yutong</a>
+                
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex ml-auto space-x-8">
+                    <a href="#home" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Home</a>
+                    <a href="#about" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">About</a>
+                    <a href="#portfolio" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Portfolio</a>
+                    <a href="#contact" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Contact</a>
+                </div>
+                
+                <!-- 移动端菜单按钮 -->
+                <button id="menu-toggle" class="md:hidden ml-auto text-primary focus:outline-none">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="md:hidden bg-white hidden absolute top-full left-0 w-full border-t border-gray-100">
+            <div class="container mx-auto px-4 py-4">
+                <a href="#home" class="block py-2 text-secondary hover:text-accent">Home</a>
+                <a href="#about" class="block py-2 text-secondary hover:text-accent">About</a>
+                <a href="#portfolio" class="block py-2 text-secondary hover:text-accent">Portfolio</a>
+                <a href="#contact" class="block py-2 text-secondary hover:text-accent">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero 区域 -->
+    <section id="home" class="min-h-screen flex items-center pt-16 relative" style="background-image: url('./img/BG1.png'); background-size: cover; background-position: center;">
+        <div class="container mx-auto px-4 py-16 relative z-10">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-12">
+                <!-- 左侧文字内容 -->
+                <div class="max-w-3xl md:w-1/2">
+                    <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight text-black" style="font-size: 96px;">Hi, I'm Wang Yutong 👋</h1>
+                    <p class="text-xl md:text-2xl mb-8 text-gray-700" style="font-size: 18px; line-height: 27px;">
+                        Form follows function.——Louis Sullivan
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#portfolio" class="px-8 py-3 bg-black text-white font-medium rounded-md hover:bg-gray-800 transition duration-300">
+                            View My Work
+                        </a>
+                        <a href="#about" class="px-8 py-3 border border-black text-black font-medium rounded-md hover:bg-black hover:text-white transition duration-300">
+                            About Me
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 右侧图片 -->
+                <div class="md:w-2/5 relative">
+                    <div id="home-default-img" class="aspect-[3/4] rounded-lg overflow-hidden transition-opacity duration-300">
+                        <img src="./img/Me.png" alt="Wang Yutong - Designer" class="w-full h-full object-contain">
+                    </div>
+                    <!-- 悬停显示的图片 -->
+                    <div id="home-hover-img" class="absolute inset-0 opacity-0 transition-opacity duration-300 rounded-lg overflow-hidden">
+                        <img src="./img/Me2.png" alt="Work 1" class="w-full h-full object-contain">
+                    </div>
+                    <!-- 人物触发区域（透明，仅覆盖人物部分） -->
+                    <div id="person-hit-area" class="absolute top-[12%] left-[22%] w-[56%] h-[72%] cursor-pointer z-20"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于我区域 -->
+
+    <section id="about" class="py-24" style="background-color: #ede9e2; background-image: url('./img/BG2.png'); background-size: cover; background-position: center;">
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="flex flex-col md:flex-row items-top gap-12">
+                <div class="md:w-1/3 reveal" style="transition-delay: 0s;">
+                    <div class="relative aspect-square rounded-3xl overflow-hidden">
+                        <img src="img/Aboutme2.jpg" alt="Wang Yutong" class="w-full h-full object-cover">
+                    </div>
+                    <div class="mt-6 space-y-5">
+                        <div>
+                            <span class="text-gray-500">教育背景：</span>
+                            <span class="font-bold text-gray-800">云南民族大学·视觉传达设计</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">联系电话：
+                            <span class="font-bold text-gray-800">15215142917</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">电子邮箱：
+                            <span class="font-bold text-gray-800">funfair2917@163.com</span>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="flex-1 border border-gray-300 rounded-xl py-3 px-2 text-center">
+                                <div class="text-xs text-gray-500">GPA</div>
+                                <div class="font-bold text-gray-800">3.6/4.0</div>
+                            </div>
+                            <div class="flex-1 border border-gray-300 rounded-xl py-3 px-2 text-center">
+                                <div class="text-xs text-gray-500">成绩排名</div>
+                                <div class="font-bold text-gray-800">5/113</div>
+                            </div>
+                            <div class="flex-1 border border-gray-300 rounded-xl py-3 px-2 text-center">
+                                <div class="text-xs text-gray-500">英语能力</div>
+                                <div class="font-bold text-gray-800">CET-4 418</div>
+                            </div>
+                        </div>
+                        <button id="view-resume-btn" class="w-full mt-4 py-3 text-white rounded-full font-medium transition-colors" style="background-image: url('./img/BGchakan.png'); background-size: cover; background-position: center;">查看简历</button>
+                    </div>
+                </div>
+                
+                <div class="md:w-2/3 reveal" style="transition-delay: 0.15s;">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">About Me</h2>
+
+                    <!-- 竞赛和科研（点击标题跳转至图片轮播页） -->
+                    <div class="mb-12">
+                        <a href="works/slideshow.html" class="inline-block cursor-pointer group">
+                            <h3 class="text-2xl font-bold mb-2 group-hover:opacity-70 transition-opacity">学习和竞赛 <i class="fa fa-external-link text-base align-middle"></i></h3>
+                        </a>
+                        <p class="text-lg font-semibold text-gray-600 mb-4">荣获教育部白名单设计竞赛奖项25项，科研项目2项</p>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">中国大学生计算机设计大赛全国三等奖×1，省级二等奖×1，校级奖项×1</span>
+                                <span class="text-gray-500 text-sm">2025</span>
+                            </div>
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">全国大学生数字媒体科技作品及创意竞赛全国三等奖×1，省级二等奖×1，校级奖项×6</span>
+                                <span class="text-gray-500 text-sm">2025</span>
+                            </div>
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">两岸新锐设计·竞赛华灿奖省级一等奖×1，省级二等奖×3，校级奖项×4</span>
+                                <span class="text-gray-500 text-sm">2025</span>
+                            </div>
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">未来设计师全国高校数字艺术设计大赛省级二等奖×1，省级三等奖×1，校级奖项×4</span>
+                                <span class="text-gray-500 text-sm">2024-2025</span>
+                            </div>
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">校级科研项目 调研报告《澜沧视域：拉祜族视觉艺术和民族文化认同》</span>
+                                <span class="text-gray-500 text-sm">2024</span>
+                            </div>
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">校级大学生创新创业训练项目《本草童绘：果蔬药食同源魔法绘本集》</span>
+                                <span class="text-gray-500 text-sm">2024-2025</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 实践经历（点击标题跳转至图片轮播页） -->
+                    <div class="mb-12">
+                        <a href="works/practice.html" class="inline-block cursor-pointer group">
+                            <h3 class="text-2xl font-bold mb-2 group-hover:opacity-70 transition-opacity">实践经历 <i class="fa fa-external-link text-base align-middle"></i></h3>
+                        </a>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">云南民族大学2023级视觉传达设计3班班长</span>
+                            </div>
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">云南省昆明市寻甸志愿者</span>
+                            </div>
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">云南民族大学志愿者</span>
+                            </div>
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">云南省玉溪市抚仙湖青屿手作（政府合作）设计师</span>
+                            </div>
+                        </div>
+                    </div>
+
+                     <!-- 荣誉称号 -->
+                    <div class="mb-12">
+                        <h3 class="text-2xl font-bold mb-2">荣誉称号</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-baseline">
+                                <span class="text-gray-700">国家奖学金×1、云南民族大学三等奖学金×1、省级三好学生×1、校级三好学生×1、校级优秀团干×1、校级优秀志愿者、区级优秀志愿者</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 作品展示区 -->
+    <section id="portfolio" class="py-24" style="background-color: #ede9e2; background-image: url('./img/BG2.png'); background-size: cover; background-position: center;">
+        <div class="container mx-auto px-4 relative z-10">
+            <h2 class="reveal text-3xl md:text-6xl font-bold mb-20 text-center">Portfolio</h2>
+
+            <!-- 第一横排：大项目 -->
+            <div class="relative mb-24 reveal" style="transition-delay: 0.1s;">
+            <div id="portfolio-scroll1" class="flex flex-nowrap gap-6 overflow-x-auto pb-8 scroll-smooth snap-x snap-mandatory" style="scrollbar-width: none;">
+                <style>#portfolio-scroll1::-webkit-scrollbar { display: none; }</style>
+                <!-- 作品1 -->
+                <div class="flex flex-col flex-shrink-0 w-[calc((100%-4.5rem)/3.5)] snap-start">
+                    <div class="relative overflow-hidden rounded-[2rem] mb-5 aspect-[3/2] bg-gray-100 cursor-pointer" onclick="window.location.href='works/work1.html'">
+                        <img src="./img/zuopianzhanshi/1.png" alt="云岭本草志" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1">云岭本草志</h3>
+                    <p class="text-sm text-gray-500 mb-2 leading-relaxed">《滇南本草》的信息可视化设计<br>成书经过、药方统计、炮制分类</p>
+                    <div class="text-sm text-gray-700 mb-1 font-semibold">信息可视化设计</div>
+                    <div class="flex items-center gap-4 mt-2">
+                        <a href="works/work1.html" class="px-4 py-1.5 text-white text-sm font-medium rounded-full transition" style="background-image: url('./img/BGchakan.png'); background-size: cover; background-position: center;">进一步了解</a>
+                    </div>
+                </div>
+
+                <!-- 作品2 -->
+                <div class="flex flex-col flex-shrink-0 w-[calc((100%-4.5rem)/3.5)] snap-start">
+                    <div class="relative overflow-hidden rounded-[2rem] mb-5 aspect-[3/2] bg-gray-100 cursor-pointer" onclick="window.location.href='works/work2.html'">
+                        <img src="./img/zuopianzhanshi/2.png" alt="内核" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1">内核</h3>
+                    <p class="text-sm text-gray-500 mb-2 leading-relaxed">昭通糖心苹果的VI设计<br>有趣、年轻化</p>
+                    <div class="text-sm text-gray-700 mb-1 font-semibold">导视设计</div>
+                    <div class="flex items-center gap-4 mt-2">
+                        <a href="works/work2.html" class="px-4 py-1.5 text-white text-sm font-medium rounded-full transition" style="background-image: url('./img/BGchakan.png'); background-size: cover; background-position: center;">进一步了解</a>
+                    </div>
+                </div>
+
+                <!-- 作品3 -->
+                <div class="flex flex-col flex-shrink-0 w-[calc((100%-4.5rem)/3.5)] snap-start">
+                    <div class="relative overflow-hidden rounded-[2rem] mb-5 aspect-[3/2] bg-gray-100 cursor-pointer" onclick="window.location.href='works/work3.html'">
+                        <img src="./img/zuopianzhanshi/3.png" alt="哈尼风物集" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="text-2xl font-bold mb-1">哈尼风物集</h3>
+                    <p class="text-sm text-gray-500 mb-2 leading-relaxed">哈尼族的插画文创设计<br>森林-村寨-梯田-水系</p>
+                    <div class="text-sm text-gray-700 mb-1 font-semibold">文创设计</div>
+                    <div class="flex items-center gap-4 mt-2">
+                        <a href="works/work3.html" class="px-4 py-1.5 text-white text-sm font-medium rounded-full transition" style="background-image: url('./img/BGchakan.png'); background-size: cover; background-position: center;">进一步了解</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 向左滚动按钮 -->
+            <button id="portfolio-prev1" aria-label="向左滚动" class="absolute right-12 -bottom-4 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-black transition z-10">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+
+            <!-- 向右滚动按钮 -->
+            <button id="portfolio-next1" aria-label="向右滚动" class="absolute right-0 -bottom-4 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-black transition z-10">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+            </div>
+
+            <!-- 第二横排：小项目 -->
+            <div class="relative reveal" style="transition-delay: 0.2s;">
+                <div id="portfolio-scroll2" class="flex flex-nowrap gap-6 overflow-x-auto pb-8 scroll-smooth snap-x snap-mandatory" style="scrollbar-width: none;">
+                    <style>#portfolio-scroll2::-webkit-scrollbar { display: none; }</style>
+                    <!-- 作品21 -->
+                    <div class="flex flex-col flex-shrink-0 w-[calc((100%-4.5rem)/3.5)] snap-start">
+                        <div class="relative overflow-hidden rounded-[2rem] mb-5 aspect-[3/2] bg-gray-100 cursor-pointer" onclick="window.location.href='works/work21.html'">
+                            <img src="./img/zuopianzhanshi/21.png" alt="洛博铜鉴" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-bold mb-1">洛博铜鉴</h3>
+                        <p class="text-sm text-gray-500 mb-3 leading-relaxed">洛阳博物馆青铜器的信息可视化设计<br>青铜分类、工艺、纹样</p>
+                        <div class="text-sm text-gray-700 mb-1 font-semibold">信息可视化设计</div>
+                        <div class="flex items-center gap-4 mt-3">
+                            <a href="works/work21.html" class="px-5 py-1.5 text-white text-sm font-medium rounded-full transition" style="background-image: url('./img/BGchakan.png'); background-size: cover; background-position: center;">进一步了解</a>
+                        </div>
+                    </div>
+
+                    <!-- 作品5 -->
+                    <div class="flex flex-col flex-shrink-0 w-[calc((100%-4.5rem)/3.5)] snap-start">
+                        <div class="relative overflow-hidden rounded-[2rem] mb-5 aspect-[3/2] bg-gray-100 cursor-pointer" onclick="window.location.href='works/work5.html'">
+                            <img src="./img/zuopianzhanshi/5.png" alt="中国远征军" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-bold mb-1">中国远征军</h3>
+                        <p class="text-sm text-gray-500 mb-3 leading-relaxed">中国远征军的信息可视化设计<br>抗战时间线、敌我战力对比、纪念地点</p>
+                        <div class="text-sm text-gray-700 mb-1 font-semibold">信息可视化设计</div>
+                        <div class="flex items-center gap-4 mt-3">
+                            <a href="works/work5.html" class="px-5 py-1.5 text-white text-sm font-medium rounded-full transition" style="background-image: url('./img/BGchakan.png'); background-size: cover; background-position: center;">进一步了解</a>
+                        </div>
+                    </div>
+
+                    <!-- 作品6 -->
+                    <div class="flex flex-col flex-shrink-0 w-[calc((100%-4.5rem)/3.5)] snap-start">
+                        <div class="relative overflow-hidden rounded-[2rem] mb-5 aspect-[3/2] bg-gray-100 cursor-pointer" onclick="window.location.href='works/work6.html'">
+                            <img src="./img/zuopianzhanshi/6.png" alt="游春城" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-bold mb-1">游春城</h3>
+                        <p class="text-sm text-gray-500 mb-3 leading-relaxed">昆明的插画设计<br>滇池中心、金马碧鸡坊中心、翠湖中心</p>
+                        <div class="text-sm text-gray-700 mb-1 font-semibold">插画设计</div>
+                        <div class="flex items-center gap-4 mt-3">
+                            <a href="works/work6.html" class="px-5 py-1.5 text-white text-sm font-medium rounded-full transition" style="background-image: url('./img/BGchakan.png'); background-size: cover; background-position: center;">进一步了解</a>
+                        </div>
+                    </div>
+
+                    <!-- 作品7 -->
+                    <div class="flex flex-col flex-shrink-0 w-[calc((100%-4.5rem)/3.5)] snap-start">
+                        <div class="relative overflow-hidden rounded-[2rem] mb-5 aspect-[3/2] bg-gray-100 cursor-pointer" onclick="window.location.href='works/work7.html'">
+                            <img src="./img/zuopianzhanshi/7.png" alt="福安印象" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-bold mb-1">福安印象</h3>
+                        <p class="text-sm text-gray-500 mb-3 leading-relaxed">昆明市晋宁区福安村的插画设计<br>花灯、刺绣、秧佬鼓舞</p>
+                        <div class="text-sm text-gray-700 mb-1 font-semibold">插画设计</div>
+                        <div class="flex items-center gap-4 mt-3">
+                            <a href="works/work7.html" class="px-5 py-1.5 text-white text-sm font-medium rounded-full transition" style="background-image: url('./img/BGchakan.png'); background-size: cover; background-position: center;">进一步了解</a>
+                        </div>
+                    </div>
+
+                    <!-- 作品8 -->
+                     <div class="flex flex-col flex-shrink-0 w-[calc((100%-4.5rem)/3.5)] snap-start">
+                        <div class="relative overflow-hidden rounded-[2rem] mb-5 aspect-[3/2] bg-gray-100 cursor-pointer" onclick="window.location.href='works/work8.html'">
+                            <img src="./img/zuopianzhanshi/8.png" alt="校园文创设计" class="w-full h-full object-cover">
+                        </div>
+                        <h3 class="text-2xl font-bold mb-1">校园文创设计</h3>
+                        <p class="text-sm text-gray-500 mb-3 leading-relaxed">云南民族大学的文创设计<br>日历设计、地图设计、建筑图标设计</p>
+                        <div class="text-sm text-gray-700 mb-1 font-semibold">文创设计</div>
+                        <div class="flex items-center gap-4 mt-3">
+                            <a href="works/work8.html" class="px-5 py-1.5 text-white text-sm font-medium rounded-full transition" style="background-image: url('./img/BGchakan.png'); background-size: cover; background-position: center;">进一步了解</a>
+                        </div>
+                    </div>
+
+
+                <!-- 向左滚动按钮 -->
+                <button id="portfolio-prev2" aria-label="向左滚动" class="absolute right-12 -bottom-4 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-black transition z-10">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+
+                <!-- 向右滚动按钮 -->
+                <button id="portfolio-next2" aria-label="向右滚动" class="absolute right-0 -bottom-4 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-black transition z-10">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 联系方式区域 -->
+     
+    <section id="contact" class="py-24" style="background-color: #f4f2ee; background-image: url('./img/BG3.png'); background-size: cover; background-position: center;">
+        <div class="container mx-auto px-4 relative z-10">
+            <h2 class="reveal text-3xl md:text-4xl font-bold mb-16 text-center">Get In Touch</h2>
+            <div class="flex flex-col lg:flex-row gap-12 reveal" style="transition-delay: 0.1s;">                
+                <!-- 右侧联系表单 -->
+                <div class="mx-auto px-4">
+                    <div class="bg-white p-8 rounded-lg shadow-sm">
+                        <h3 class="text-2xl font-semibold mb-6">Send Me a Message</h3>
+                        
+                        <form id="contact-form" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">发件人</label>
+                                    <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                                    <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">主题</label>
+                                <input type="text" id="subject" name="subject" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent">
+                            </div>
+                            
+                            <div>
+                                <label for="message" class="block text-sm font-medium text-gray-700 mb-1">消息</label>
+                                <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="w-full px-8 py-3 bg-black text-white font-medium rounded-md hover:bg-gray-800 transition duration-300">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="py-12 bg-black text-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-2xl font-bold">Wang Yutong</h3>
+                    <p class="text-gray-400 mt-2">A designer crafting digital experiences.</p>
+                </div>
+                
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-behance text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-dribbble text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>© 2025 Wang Yutong. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 回到顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-black text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg opacity-0 invisible transition-all duration-300 z-50">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+
+    <!-- 简历图片查看器（Esc/点击背景关闭） -->
+    <div id="resume-viewer" class="image-viewer">
+        <span class="image-viewer-close" onclick="closeResumeViewer()">×</span>
+        <div class="viewer-main" onclick="event.stopPropagation()">
+            <img id="resume-img" src="img/jianli-03.jpg" alt="简历">
+        </div>
+    </div>
+
+    <script>
+        // 简历查看器（与作品页图片查看器操作一致）
+        let resumeScale = 1;
+
+        function openResumeViewer() {
+            const viewer = document.getElementById('resume-viewer');
+            const img = document.getElementById('resume-img');
+            resumeScale = 1;
+            img.style.transform = 'scale(1)';
+            viewer.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeResumeViewer() {
+            const viewer = document.getElementById('resume-viewer');
+            viewer.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // 点击查看器背景关闭（图片区域内点击不关闭）
+        document.getElementById('resume-viewer').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeResumeViewer();
+            }
+        });
+
+        // Esc 键关闭
+        document.addEventListener('keydown', function(e) {
+            const viewer = document.getElementById('resume-viewer');
+            if (viewer.classList.contains('active') && e.key === 'Escape') {
+                closeResumeViewer();
+            }
+        });
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 查看简历按钮
+            document.getElementById('view-resume-btn').addEventListener('click', openResumeViewer);
+
+            // 移动端菜单切换
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // 平滑滚动
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 关闭移动菜单（如果打开）
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80, // 考虑导航栏高度
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // 导航栏滚动效果
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-white', 'shadow-md');
+                    navbar.classList.remove('bg-opacity-95');
+                } else {
+                    navbar.classList.remove('shadow-md');
+                    navbar.classList.add('bg-opacity-95');
+                }
+            });
+            
+            // 回到顶部按钮
+            const backToTopButton = document.getElementById('back-to-top');
+            
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    backToTopButton.classList.remove('opacity-0', 'invisible');
+                    backToTopButton.classList.add('opacity-100', 'visible');
+                } else {
+                    backToTopButton.classList.add('opacity-0', 'invisible');
+                    backToTopButton.classList.remove('opacity-100', 'visible');
+                }
+            });
+            
+            backToTopButton.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // 滚动动画
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            const fadeInOnScroll = function() {
+                fadeElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (elementTop < windowHeight - 100) {
+                        element.classList.add('active');
+                    }
+                });
+            };
+            
+            // 初始检查
+            fadeInOnScroll();
+            
+            // 滚动时检查
+            window.addEventListener('scroll', fadeInOnScroll);
+            
+            // 使用 GSAP 添加更复杂的动画
+            if (typeof gsap !== 'undefined') {
+                // Hero 区域动画
+                gsap.from('#home h1', {
+                    opacity: 0,
+                    y: 50,
+                    duration: 1,
+                    delay: 0.2
+                });
+                
+                gsap.from('#home p', {
+                    opacity: 0,
+                    y: 30,
+                    duration: 1,
+                    delay: 0.5
+                });
+                
+                gsap.from('#home .flex', {
+                    opacity: 0,
+                    y: 20,
+                    duration: 1,
+                    delay: 0.8
+                });
+                
+                // 作品卡片动画
+                gsap.utils.toArray('.work-card').forEach((card, i) => {
+                    gsap.from(card, {
+                        scrollTrigger: {
+                            trigger: card,
+                            start: 'top bottom-=100',
+                            toggleActions: 'play none none none'
+                        },
+                        opacity: 0,
+                        y: 50,
+                        duration: 0.8,
+                        delay: i * 0.1
+                    });
+                });
+            }
+            
+            // 表单提交处理
+            const contactForm = document.getElementById('contact-form');
+            
+            if (contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // 获取表单数据
+                    const formData = new FormData(contactForm);
+                    const formDataObject = {};
+                    
+                    formData.forEach((value, key) => {
+                        formDataObject[key] = value;
+                    });
+                    
+                    // 在实际应用中，这里会发送数据到服务器
+                    // 这里仅做演示，显示提交成功消息
+                    alert('Message sent successfully!');
+                    contactForm.reset();
+                });
+            }
+
+            // 第二排滚动按钮
+            const scrollEl2 = document.getElementById('portfolio-scroll2');
+            const nextBtn2 = document.getElementById('portfolio-next2');
+            const prevBtn2 = document.getElementById('portfolio-prev2');
+
+            function updateScrollButtons2() {
+                if (!scrollEl2 || !nextBtn2 || !prevBtn2) return;
+                const maxScrollLeft = scrollEl2.scrollWidth - scrollEl2.clientWidth;
+                if (scrollEl2.scrollLeft <= 0) {
+                    prevBtn2.classList.add('opacity-40', 'cursor-not-allowed');
+                    prevBtn2.setAttribute('disabled', 'true');
+                } else {
+                    prevBtn2.classList.remove('opacity-40', 'cursor-not-allowed');
+                    prevBtn2.removeAttribute('disabled');
+                }
+                if (scrollEl2.scrollLeft >= maxScrollLeft - 1) {
+                    nextBtn2.classList.add('opacity-40', 'cursor-not-allowed');
+                    nextBtn2.setAttribute('disabled', 'true');
+                } else {
+                    nextBtn2.classList.remove('opacity-40', 'cursor-not-allowed');
+                    nextBtn2.removeAttribute('disabled');
+                }
+            }
+
+            function scrollByOneCard2(direction) {
+                if (!scrollEl2) return;
+                const cardWidth = scrollEl2.querySelector('[class*="flex-shrink-0"]')?.offsetWidth || 300;
+                const gap = parseInt(window.getComputedStyle(scrollEl2).gap || '24', 10);
+                scrollEl2.scrollBy({ left: direction * (cardWidth + gap), behavior: 'smooth' });
+            }
+
+            if (nextBtn2) {
+                nextBtn2.addEventListener('click', function() {
+                    if (this.getAttribute('disabled')) return;
+                    scrollByOneCard2(1);
+                });
+            }
+            if (prevBtn2) {
+                prevBtn2.addEventListener('click', function() {
+                    if (this.getAttribute('disabled')) return;
+                    scrollByOneCard2(-1);
+                });
+            }
+            if (scrollEl2) {
+                scrollEl2.addEventListener('scroll', updateScrollButtons2);
+                window.addEventListener('resize', updateScrollButtons2);
+                updateScrollButtons2();
+            }
+
+            // 第一排滚动按钮
+            const scrollEl1 = document.getElementById('portfolio-scroll1');
+            const nextBtn1 = document.getElementById('portfolio-next1');
+            const prevBtn1 = document.getElementById('portfolio-prev1');
+
+            function updateScrollButtons1() {
+                if (!scrollEl1 || !nextBtn1 || !prevBtn1) return;
+                const maxScrollLeft = scrollEl1.scrollWidth - scrollEl1.clientWidth;
+                if (scrollEl1.scrollLeft <= 0) {
+                    prevBtn1.classList.add('opacity-40', 'cursor-not-allowed');
+                    prevBtn1.setAttribute('disabled', 'true');
+                } else {
+                    prevBtn1.classList.remove('opacity-40', 'cursor-not-allowed');
+                    prevBtn1.removeAttribute('disabled');
+                }
+                if (scrollEl1.scrollLeft >= maxScrollLeft - 1) {
+                    nextBtn1.classList.add('opacity-40', 'cursor-not-allowed');
+                    nextBtn1.setAttribute('disabled', 'true');
+                } else {
+                    nextBtn1.classList.remove('opacity-40', 'cursor-not-allowed');
+                    nextBtn1.removeAttribute('disabled');
+                }
+            }
+
+            function scrollByOneCard1(direction) {
+                if (!scrollEl1) return;
+                const cardWidth = scrollEl1.querySelector('[class*="flex-shrink-0"]')?.offsetWidth || 300;
+                const gap = parseInt(window.getComputedStyle(scrollEl1).gap || '24', 10);
+                scrollEl1.scrollBy({ left: direction * (cardWidth + gap), behavior: 'smooth' });
+            }
+
+            if (nextBtn1) {
+                nextBtn1.addEventListener('click', function() {
+                    if (this.getAttribute('disabled')) return;
+                    scrollByOneCard1(1);
+                });
+            }
+            if (prevBtn1) {
+                prevBtn1.addEventListener('click', function() {
+                    if (this.getAttribute('disabled')) return;
+                    scrollByOneCard1(-1);
+                });
+            }
+            if (scrollEl1) {
+                scrollEl1.addEventListener('scroll', updateScrollButtons1);
+                window.addEventListener('resize', updateScrollButtons1);
+                updateScrollButtons1();
+            }
+
+            // 滚动渐入动画
+            const observerOptions = {
+                threshold: 0.15,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, observerOptions);
+
+            // 观察所有 fade-in 和 reveal 元素
+            document.querySelectorAll('.fade-in, .reveal').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Home 区域内容立即可见（无需动画，避免 opacity:0 导致内容消失）
+
+            // 人物区域悬停切换图片
+            const hitArea = document.getElementById('person-hit-area');
+            const defaultImg = document.getElementById('home-default-img');
+            const hoverImg = document.getElementById('home-hover-img');
+
+            if (hitArea && defaultImg && hoverImg) {
+                hitArea.addEventListener('mouseenter', () => {
+                    defaultImg.style.opacity = '0';
+                    hoverImg.style.opacity = '1';
+                });
+                hitArea.addEventListener('mouseleave', () => {
+                    defaultImg.style.opacity = '1';
+                    hoverImg.style.opacity = '0';
+                });
+            }
+        });
+    </script>
+
+    <!-- 禁止图片下载：右键菜单、拖拽、快捷键、开发者工具 -->
+    <script>
+    (function() {
+        // 1. 全局禁止右键菜单（不仅限于 img 元素，覆盖图片容器）
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+        // 2. 全局禁止拖拽（图片无法拖到桌面或其他窗口）
+        document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+
+        // 3. 拦截保存网页、查看源码、开发者工具等快捷键
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S 保存
+            if (e.ctrlKey && (e.key === 's' || e.key === 'S')) { e.preventDefault(); return false; }
+            // Ctrl+U 查看源码
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); return false; }
+            // F12 开发者工具
+            if (e.key === 'F12') { e.preventDefault(); return false; }
+            // Ctrl+Shift+I / Ctrl+Shift+J 开发者工具
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+            // Ctrl+Shift+C 检查元素
+            if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
+        });
+
+        // 4. 给所有现有图片设置 draggable=false
+        function setImgNotDraggable() {
+            document.querySelectorAll('img').forEach(function(img) {
+                img.setAttribute('draggable', 'false');
+                img.setAttribute('oncontextmenu', 'return false');
+                img.setAttribute('onselectstart', 'return false');
+                img.setAttribute('ondragstart', 'return false');
+            });
+        }
+        setImgNotDraggable();
+
+        // 5. 监听 DOM 变化，对动态添加的图片也生效（图片查看器、轮播等）
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) {
+                        if (node.tagName === 'IMG') {
+                            node.setAttribute('draggable', 'false');
+                            node.setAttribute('oncontextmenu', 'return false');
+                            node.setAttribute('ondragstart', 'return false');
+                        }
+                        node.querySelectorAll && node.querySelectorAll('img').forEach(function(img) {
+                            img.setAttribute('draggable', 'false');
+                            img.setAttribute('oncontextmenu', 'return false');
+                            img.setAttribute('ondragstart', 'return false');
+                        });
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    })();
+    </script>
+
+</body></html>

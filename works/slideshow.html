@@ -1,0 +1,385 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习和竞赛 | Wang Yutong</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#111111',
+                        secondary: '#333333',
+                        accent: '#0066ff',
+                        light: '#f5f5f5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .nav-shadow {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ===== 自动轮播舞台 ===== */
+        .slideshow-stage {
+            position: relative;
+            width: 100%;
+            height: 62vh;
+            min-height: 360px;
+            cursor: pointer;
+        }
+        /* 暂停状态下中央显示的播放提示图标 */
+        .play-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            opacity: 0;
+            transition: opacity 0.25s, transform 0.25s;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .play-hint.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        /* 每张幻灯片叠放，默认透明 */
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+            pointer-events: none;
+        }
+        .slide.active {
+            opacity: 1;
+        }
+        .slide img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border: 8px solid #ffffff;
+            box-sizing: border-box;
+            border-radius: 2px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 指示点 */
+        .slide-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.2);
+            transition: background 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        .slide-dot.active {
+            background: #111111;
+            transform: scale(1.3);
+        }
+
+        /* 禁止图片下载：禁止选中、禁止拖拽 */
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="text-primary font-sans" style="background-image: url('../img/BG3.png'); background-size: cover; background-position: center; background-attachment: fixed;">
+    <!-- 导航栏 -->
+    <nav id="navbar" class="fixed top-0 left-0 w-full bg-white bg-opacity-95 nav-shadow py-4 z-50">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold text-primary">Wang Yutong</a>
+
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex ml-auto space-x-8">
+                    <a href="../index.html" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Home</a>
+                    <a href="../index.html#about" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">About</a>
+                    <a href="../index.html#works" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Portfolio</a>
+                    <a href="../index.html#contact" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Contact</a>
+                </div>
+
+                <!-- 移动端菜单按钮 -->
+                <button id="menu-toggle" class="md:hidden ml-auto text-primary focus:outline-none">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="md:hidden bg-white hidden absolute top-full left-0 w-full border-t border-gray-100">
+            <div class="container mx-auto px-4 py-4">
+                <a href="../index.html" class="block py-2 text-secondary hover:text-accent">Home</a>
+                <a href="../index.html#about" class="block py-2 text-secondary hover:text-accent">About</a>
+                <a href="../index.html#works" class="block py-2 text-secondary hover:text-accent">Portfolio</a>
+                <a href="../index.html#contact" class="block py-2 text-secondary hover:text-accent">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容：自动轮播 -->
+    <main class="pt-16 pb-16">
+        <section class="pt-12 md:pt-16 pb-8">
+            <div class="container mx-auto px-4">
+                <div class="max-w-6xl mx-auto">
+
+                    <!-- 标题 -->
+                    <h1 class="text-3xl md:text-4xl font-bold mb-2 tracking-wider">学习和竞赛</h1>
+                    <p class="text-gray-500 mb-8 md:mb-10">荣获教育部白名单设计竞赛奖项25项，科研项目2项</p>
+
+                    <!-- 轮播舞台：work10 学习竞赛图片（../img/10/01/）共14张，每张停留1.5秒，循环播放；点击图片可暂停/继续 -->
+                    <div class="slideshow-stage" id="slideshow-stage">
+                        <div class="slide active">
+                            <img src="../img/10/01/1.jpg" alt="竞赛和科研1">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/2.jpg" alt="竞赛和科研2">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/3.jpg" alt="竞赛和科研3">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/4.jpg" alt="竞赛和科研4">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/5.jpg" alt="竞赛和科研5">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/6.jpg" alt="竞赛和科研6">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/7.jpg" alt="竞赛和科研7">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/8.jpg" alt="竞赛和科研8">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/9.jpg" alt="竞赛和科研9">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/10.jpg" alt="竞赛和科研10">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/11.jpg" alt="竞赛和科研11">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/12.png" alt="竞赛和科研12">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/13.png" alt="竞赛和科研13">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/10/01/14.jpg" alt="竞赛和科研14">
+                        </div>
+                        <!-- 暂停时中央显示播放图标（点击图片区域可暂停/继续） -->
+                        <div class="play-hint" id="play-hint">
+                            <i class="fa fa-play"></i>
+                        </div>
+                    </div>
+
+                    <!-- 指示点 -->
+                    <div id="slideshow-dots" class="flex justify-center gap-2 mt-6"></div>
+
+                    <!-- 返回作品页 -->
+                    <div class="text-center mt-8">
+                        <a href="work10.html" class="inline-block px-6 py-2.5 rounded-full border border-black font-medium bg-black text-white hover:opacity-90 transition-colors">
+                            查看完整作品页
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="py-12 bg-black text-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-2xl font-bold">Wang Yutong</h3>
+                    <p class="text-gray-400 mt-1">视觉传达设计 · Visual Communication Design</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="../index.html" class="text-gray-400 hover:text-white transition-colors">Home</a>
+                    <a href="../index.html#about" class="text-gray-400 hover:text-white transition-colors">About</a>
+                    <a href="../index.html#works" class="text-gray-400 hover:text-white transition-colors">Portfolio</a>
+                    <a href="../index.html#contact" class="text-gray-400 hover:text-white transition-colors">Contact</a>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>© 2025 Wang Yutong. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // ===== 图片自动轮播：每张停顿 1.5 秒，淡入淡出，循环播放 =====
+            const slides = Array.from(document.querySelectorAll('.slide'));
+            const dotsWrap = document.getElementById('slideshow-dots');
+            const SLIDE_INTERVAL = 1500; // 每张图片停留 1.5 秒
+            let current = 0;
+
+            // 生成指示点
+            slides.forEach(function(_, i) {
+                const dot = document.createElement('span');
+                dot.className = 'slide-dot' + (i === 0 ? ' active' : '');
+                dot.addEventListener('click', function() {
+                    goToSlide(i);
+                });
+                dotsWrap.appendChild(dot);
+            });
+            const dots = Array.from(dotsWrap.children);
+
+            function goToSlide(index) {
+                slides[current].classList.remove('active');
+                dots[current].classList.remove('active');
+                current = (index + slides.length) % slides.length; // 循环
+                slides[current].classList.add('active');
+                dots[current].classList.add('active');
+            }
+
+            // 预加载全部图片，避免切换时闪烁
+            slides.forEach(function(s) {
+                const img = s.querySelector('img');
+                if (img) {
+                    const preload = new Image();
+                    preload.src = img.src;
+                }
+            });
+
+            // ===== 点击图片区域：暂停 / 再次点击继续播放 =====
+            const stage = document.getElementById('slideshow-stage');
+            const playHint = document.getElementById('play-hint');
+            let timer = null;
+            let isPaused = false;
+
+            function startAutoPlay() {
+                if (timer) clearInterval(timer);
+                // 每张停留 SLIDE_INTERVAL 毫秒，末尾自动回到第一张
+                timer = setInterval(function() {
+                    goToSlide(current + 1);
+                }, SLIDE_INTERVAL);
+            }
+            function stopAutoPlay() {
+                clearInterval(timer);
+                timer = null;
+            }
+
+            stage.addEventListener('click', function() {
+                if (isPaused) {
+                    // 继续播放
+                    isPaused = false;
+                    playHint.classList.remove('show');
+                    startAutoPlay();
+                } else {
+                    // 暂停
+                    isPaused = true;
+                    playHint.classList.add('show');
+                    stopAutoPlay();
+                }
+            });
+
+            // 页面加载后启动自动播放
+            startAutoPlay();
+        });
+    </script>
+    <!-- 禁止图片下载：右键菜单、拖拽、快捷键、开发者工具 -->
+    <script>
+    (function() {
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && (e.key === 's' || e.key === 'S')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); return false; }
+            if (e.key === 'F12') { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
+        });
+        function setImgNotDraggable() {
+            document.querySelectorAll('img').forEach(function(img) {
+                img.setAttribute('draggable', 'false');
+                img.setAttribute('oncontextmenu', 'return false');
+                img.setAttribute('ondragstart', 'return false');
+            });
+        }
+        setImgNotDraggable();
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) {
+                        if (node.tagName === 'IMG') {
+                            node.setAttribute('draggable', 'false');
+                            node.setAttribute('oncontextmenu', 'return false');
+                            node.setAttribute('ondragstart', 'return false');
+                        }
+                        node.querySelectorAll && node.querySelectorAll('img').forEach(function(img) {
+                            img.setAttribute('draggable', 'false');
+                            img.setAttribute('oncontextmenu', 'return false');
+                            img.setAttribute('ondragstart', 'return false');
+                        });
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    })();
+    </script>
+</body>
+</html>

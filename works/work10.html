@@ -1,0 +1,762 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>王语童的三年 | 作品详情 | Wang Yutong</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- GSAP 动画库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#111111',
+                        secondary: '#333333',
+                        accent: '#0066ff',
+                        light: '#f5f5f5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-balance {
+                text-wrap: balance;
+            }
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            .transition-transform {
+                transition-property: transform;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+                transition-duration: 300ms;
+            }
+            .hover-scale {
+                @apply hover:scale-105 transition-transform duration-300;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+            .nav-shadow {
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+        }
+    </style>
+
+    <style>
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #bbb;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+        /* 图片查看器样式 */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            flex-direction: row;
+        }
+
+        .image-viewer.active {
+            display: flex;
+        }
+
+        .viewer-main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 60px 20px 20px 20px;
+        }
+
+        .viewer-main img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .viewer-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border: none;
+            z-index: 10;
+        }
+        .viewer-nav:hover {
+            background: rgba(255,255,255,0.4);
+        }
+        .viewer-prev { left: 20px; }
+        .viewer-next { right: 20px; }
+        .viewer-nav.disabled, .viewer-nav.disabled:hover {
+            background: rgba(128,128,128,0.5) !important;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .viewer-sidebar {
+            width: 100px;
+            background: rgba(0,0,0,0.4);
+            padding: 50px 6px 6px 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .viewer-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 2px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s, transform 0.2s;
+            border: 1px solid transparent;
+            background: #333;
+        }
+        .viewer-thumb:hover {
+            opacity: 0.85;
+        }
+        .viewer-thumb.active {
+            opacity: 1;
+            border-color: #0066ff;
+            transform: scale(1.05);
+        }
+
+        .viewer-thumb-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            flex-shrink: 0;
+        }
+
+        .image-viewer-close {
+            position: absolute;
+            top: 20px;
+            right: 130px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        /* Bento 照片统一白色边框（学习竞赛 + 综合实践全部生效） */
+        .bento-wrap .photo-item img {
+            border: 8px solid #ffffff;
+            box-sizing: border-box;
+            border-radius: 2px;
+        }
+
+        /* Bento Grid 作品网格 — 12列栅格基础；按张数分两种行高模板 */
+        .bento-wrap {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 0.75rem;
+        }
+        /* 列占位 — 12等分中占 N 份 */
+        .bento-col-3 { grid-column: span 3 / span 3; }
+        .bento-col-4 { grid-column: span 4 / span 4; }
+        .bento-col-5 { grid-column: span 5 / span 5; }
+        .bento-col-7 { grid-column: span 7 / span 7; }
+        /* 6 张版：2 行（上高下矮） */
+        .bento-wrap-6 {
+            grid-template-rows: 280px 220px;
+        }
+        /* 14 张版：5 行（两大段+底部两小图，视觉节奏与手绘一致） */
+        .bento-wrap-14 {
+            grid-template-rows: 280px 220px 280px 220px 240px;
+        }
+        /* 16 张版：6 行（两大段+底部四小图） */
+        .bento-wrap-16 {
+            grid-template-rows: 280px 220px 280px 220px 240px 200px;
+        }
+
+        .photo-item {
+            overflow: hidden;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            position: relative;
+            background: #f3f4f6;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .photo-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .photo-item .ph {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            background: repeating-linear-gradient(
+                45deg,
+                #f3f4f6,
+                #f3f4f6 10px,
+                #e5e7eb 10px,
+                #e5e7eb 20px
+            );
+            font-size: 1.75rem;
+        }
+
+        /* 移动端响应式 */
+        @media (max-width: 768px) {
+            .bento-wrap {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.5rem;
+            }
+            /* 6 张版：2 行等高 */
+            .bento-wrap-6 {
+                grid-template-rows: 180px 180px;
+            }
+            /* 14 张版：5 行（15格），最后一格空置 */
+            .bento-wrap-14 {
+                grid-template-rows: repeat(5, 180px);
+            }
+            /* 16 张版：6 行（18格），最后两行未满 */
+            .bento-wrap-16 {
+                grid-template-rows: repeat(6, 180px);
+            }
+            .bento-wrap .bento-col-3,
+            .bento-wrap .bento-col-4,
+            .bento-wrap .bento-col-5,
+            .bento-wrap .bento-col-7 {
+                grid-column: span 1 !important;
+            }
+        }
+
+        /* 淡入动画 */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 禁止图片下载：禁止选中、禁止拖拽 */
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="text-primary font-sans" style="background-image: url('../img/BG3.png'); background-size: cover; background-position: center; background-attachment: fixed;">
+    <!-- 导航栏 -->
+    <nav id="navbar" class="fixed top-0 left-0 w-full bg-white bg-opacity-95 nav-shadow py-4 z-50">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold text-primary">Wang Yutong</a>
+
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex ml-auto space-x-8">
+                    <a href="../index.html" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Home</a>
+                    <a href="../index.html#about" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">About</a>
+                    <a href="../index.html#works" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Portfolio</a>
+                    <a href="../index.html#contact" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Contact</a>
+                </div>
+
+                <!-- 移动端菜单按钮 -->
+                <button id="menu-toggle" class="md:hidden ml-auto text-primary focus:outline-none">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="md:hidden bg-white hidden absolute top-full left-0 w-full border-t border-gray-100">
+            <div class="container mx-auto px-4 py-4">
+                <a href="../index.html" class="block py-2 text-secondary hover:text-accent">Home</a>
+                <a href="../index.html#about" class="block py-2 text-secondary hover:text-accent">About</a>
+                <a href="../index.html#works" class="block py-2 text-secondary hover:text-accent">Portfolio</a>
+                <a href="../index.html#contact" class="block py-2 text-secondary hover:text-accent">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <main class="pt-16 pb-16">
+        <!-- 作品展示：顶部横排标题 + 横排标签 + 2行Bento网格 -->
+        <section class="pt-24 pb-8">
+            <div class="container mx-auto px-4">
+                <div class="max-w-6xl mx-auto">
+
+                    <!-- ===== 标题（横排居左） ===== -->
+                    <h1 class="text-3xl md:text-5xl font-bold mb-6 md:mb-8 tracking-wider">
+                        王语童的三年
+                    </h1>
+
+                    <!-- ===== 横排标签（3个水平并排） ===== -->
+                    <div class="flex flex-wrap gap-3 md:gap-4 mb-8 md:mb-10">
+                        <button id="tab-xuexi" onclick="showTenTab('xuexi')"
+                            class="px-5 py-2 md:px-6 md:py-2.5 rounded-full border border-black font-medium transition-colors bg-black text-white hover:opacity-90 whitespace-nowrap">
+                            学习竞赛
+                        </button>
+                        <button id="tab-zonghe" onclick="showTenTab('zonghe')"
+                            class="px-5 py-2 md:px-6 md:py-2.5 rounded-full border border-gray-300 font-medium transition-colors bg-white hover:bg-gray-50 whitespace-nowrap">
+                            综合实践
+                        </button>
+                    </div>
+
+                    <!-- ===== 左侧：照片 Bento 网格区（2行3列不规则，用12列栅格实现大小差异） ===== -->
+                    <div class="w-full">
+
+                        <!-- 分类2：学习竞赛（默认显示，14张） -->
+                        <div id="cat-xuexi" class="bento-wrap bento-wrap-14">
+                            <!-- 第一大段：6张（行1 4+5+3 / 行2 3+4+5，总12列） -->
+                            <div class="photo-item cursor-pointer bento-col-4">
+                                <img src="../img/10/01/1.jpg" alt="学习竞赛1" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/01/2.jpg" alt="学习竞赛2" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-3">
+                                <img src="../img/10/01/3.jpg" alt="学习竞赛3" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-3">
+                                <img src="../img/10/01/4.jpg" alt="学习竞赛4" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-4">
+                                <img src="../img/10/01/5.jpg" alt="学习竞赛5" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/01/6.jpg" alt="学习竞赛6" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <!-- 第二大段：6张（行3 5+4+3 / 行4 5+4+3，总12列，宽度反向） -->
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/01/7.jpg" alt="学习竞赛7" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-4">
+                                <img src="../img/10/01/8.jpg" alt="学习竞赛8" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-3">
+                                <img src="../img/10/01/9.jpg" alt="学习竞赛9" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/01/10.jpg" alt="学习竞赛10" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-4">
+                                <img src="../img/10/01/11.jpg" alt="学习竞赛11" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-3">
+                                <img src="../img/10/01/12.png" alt="学习竞赛12" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <!-- 第五行收尾：2张（7+5，总12列） -->
+                            <div class="photo-item cursor-pointer bento-col-7">
+                                <img src="../img/10/01/13.png" alt="学习竞赛13" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/01/14.jpg" alt="学习竞赛14" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                        </div>
+
+                        <!-- 分类3：综合实践（16张） -->
+                        <div id="cat-zonghe" class="bento-wrap bento-wrap-16 hidden">
+                            <!-- 第一大段：6张（行1 4+5+3 / 行2 3+4+5，总12列） -->
+                            <div class="photo-item cursor-pointer bento-col-4">
+                                <img src="../img/10/02/1.jpg" alt="综合实践1" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/02/2.jpg" alt="综合实践2" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-3">
+                                <img src="../img/10/02/3.jpg" alt="综合实践3" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-3">
+                                <img src="../img/10/02/4.jpg" alt="综合实践4" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-4">
+                                <img src="../img/10/02/5.jpg" alt="综合实践5" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/02/6.jpg" alt="综合实践6" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <!-- 第二大段：6张（行3 5+4+3 / 行4 5+4+3，总12列） -->
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/02/7.jpg" alt="综合实践7" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-4">
+                                <img src="../img/10/02/8.jpg" alt="综合实践8" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-3">
+                                <img src="../img/10/02/9.jpg" alt="综合实践9" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/02/10.jpg" alt="综合实践10" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-4">
+                                <img src="../img/10/02/11.jpg" alt="综合实践11" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-3">
+                                <img src="../img/10/02/12.jpg" alt="综合实践12" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <!-- 收尾：4张（行5 7+5 / 行6 5+7，总12列） -->
+                            <div class="photo-item cursor-pointer bento-col-7">
+                                <img src="../img/10/02/13.jpg" alt="综合实践13" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/02/14.jpg" alt="综合实践14" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-5">
+                                <img src="../img/10/02/15.jpg" alt="综合实践15" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                            <div class="photo-item cursor-pointer bento-col-7">
+                                <img src="../img/10/02/16.jpg" alt="综合实践16" loading="lazy" class="w-full h-full object-cover" onclick="openImageViewer(event)">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="py-12 bg-black text-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-2xl font-bold">Wang Yutong</h3>
+                    <p class="text-gray-400 mt-2">A designer crafting digital experiences.</p>
+                </div>
+
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-behance text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-dribbble text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>© 2025 Wang Yutong. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 图片查看器 -->
+    <div id="image-viewer" class="image-viewer">
+        <span class="image-viewer-close" onclick="closeImageViewer()">×</span>
+        <div class="viewer-main" onclick="event.stopPropagation()">
+            <button class="viewer-nav viewer-prev" onclick="prevImage()" title="上一张">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+            <img id="viewer-image" src="" alt="Large image view">
+            <button class="viewer-nav viewer-next" onclick="nextImage()" title="下一张">
+                <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+        <div class="viewer-sidebar" id="viewer-sidebar"></div>
+    </div>
+
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 移动端菜单切换
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // 支持通过 URL hash 直接打开指定标签（如 work10.html#zonghe 打开综合实践）
+            if (location.hash === '#zonghe') {
+                showTenTab('zonghe');
+            }
+
+            // 导航栏滚动效果
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-white', 'shadow-md');
+                    navbar.classList.remove('bg-opacity-95');
+                } else {
+                    navbar.classList.remove('shadow-md');
+                    navbar.classList.add('bg-opacity-95');
+                }
+            });
+
+            // 淡入动画
+            const fadeElements = document.querySelectorAll('.fade-in');
+
+            const fadeInOnScroll = function() {
+                fadeElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+
+                    if (elementTop < windowHeight - 100) {
+                        element.classList.add('active');
+                    }
+                });
+            };
+
+            fadeInOnScroll();
+            window.addEventListener('scroll', fadeInOnScroll);
+
+            // 使用 GSAP 添加动画
+            if (typeof gsap !== 'undefined') {
+                gsap.from('section:first-of-type h1', {
+                    opacity: 0,
+                    y: 50,
+                    duration: 1,
+                    delay: 0.2
+                });
+            }
+        });
+
+        // ===== work10 标签切换：学习竞赛 / 综合实践 =====
+        function showTenTab(cat) {
+            // 1. 显示对应分类相册，隐藏其他
+            const cats = ['xuexi', 'zonghe'];
+            cats.forEach(function(c) {
+                const el = document.getElementById('cat-' + c);
+                if (!el) return;
+                if (c === cat) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+            // 2. 更新标签按钮样式（选中：黑底白字+黑边；未选中：白底灰边）
+            cats.forEach(function(c) {
+                const btn = document.getElementById('tab-' + c);
+                if (!btn) return;
+                if (c === cat) {
+                    btn.classList.remove('bg-white', 'border-gray-300', 'hover:bg-gray-50');
+                    btn.classList.add('bg-black', 'text-white', 'border-black', 'hover:opacity-90');
+                } else {
+                    btn.classList.remove('bg-black', 'text-white', 'border-black', 'hover:opacity-90');
+                    btn.classList.add('bg-white', 'border-gray-300', 'hover:bg-gray-50');
+                }
+            });
+        }
+
+        // ===== 图片查看器 =====
+        let viewerItems = [];
+        let viewerIndex = 0;
+        let viewerScale = 1;
+
+        function openImageViewer(e) {
+            const itemEl = e.target.closest('.photo-item');
+            if (!itemEl) return;
+
+            // 如果是占位符，提示用户
+            if (itemEl.querySelector('.ph')) {
+                alert('请将摄影图片替换到对应位置');
+                return;
+            }
+
+            const container = itemEl.parentElement;
+            const images = Array.from(container.querySelectorAll('img'));
+
+            // 构建图片列表
+            viewerItems = images.map(function(img) {
+                return { type: 'image', src: img.src };
+            });
+
+            // 找到当前点击的图片索引
+            const clickedImg = itemEl.querySelector('img');
+            viewerIndex = clickedImg ? images.indexOf(clickedImg) : 0;
+            if (viewerIndex < 0) viewerIndex = 0;
+
+            const viewer = document.getElementById('image-viewer');
+            const viewerImage = document.getElementById('viewer-image');
+            const sidebar = document.getElementById('viewer-sidebar');
+
+            // 初始化显示
+            viewerImage.src = viewerItems[viewerIndex].src;
+            viewerScale = 1;
+            viewerImage.style.transform = 'scale(1)';
+
+            // 构建缩略图侧边栏
+            sidebar.innerHTML = '';
+            viewerItems.forEach(function(item, i) {
+                const wrap = document.createElement('div');
+                wrap.className = 'viewer-thumb-wrap';
+
+                const thumb = document.createElement('img');
+                thumb.src = item.src;
+                thumb.className = 'viewer-thumb';
+                wrap.appendChild(thumb);
+
+                if (i === viewerIndex) {
+                    thumb.classList.add('active');
+                }
+                wrap.onclick = function() {
+                    viewerIndex = i;
+                    showViewerItem();
+                };
+                sidebar.appendChild(wrap);
+            });
+
+            viewer.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function showViewerItem() {
+            const viewerImage = document.getElementById('viewer-image');
+            const sidebar = document.getElementById('viewer-sidebar');
+            const item = viewerItems[viewerIndex];
+
+            viewerImage.src = item.src;
+            viewerScale = 1;
+            viewerImage.style.transform = 'scale(1)';
+
+            // 更新缩略图高亮
+            const thumbs = sidebar.querySelectorAll('.viewer-thumb');
+            thumbs.forEach(function(thumb, i) {
+                thumb.classList.toggle('active', i === viewerIndex);
+            });
+            // update nav button state
+            const prevBtn = document.querySelector('.viewer-prev');
+            const nextBtn = document.querySelector('.viewer-next');
+            if (prevBtn) prevBtn.classList.toggle('disabled', viewerIndex === 0);
+            if (nextBtn) nextBtn.classList.toggle('disabled', viewerIndex === viewerItems.length - 1);
+        }
+
+        function prevImage() {
+            if (viewerIndex > 0) {
+                viewerIndex--;
+                showViewerItem();
+            }
+        }
+
+        function nextImage() {
+            if (viewerIndex < viewerItems.length - 1) {
+                viewerIndex++;
+                showViewerItem();
+            }
+        }
+
+        function closeImageViewer() {
+            const viewer = document.getElementById('image-viewer');
+            viewer.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // 点击图片查看器背景关闭
+        document.getElementById('image-viewer').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImageViewer();
+            }
+        });
+
+        // 键盘导航支持
+        document.addEventListener('keydown', function(e) {
+            const viewer = document.getElementById('image-viewer');
+            if (viewer.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    closeImageViewer();
+                } else if (e.key === 'ArrowLeft') {
+                    prevImage();
+                } else if (e.key === 'ArrowRight') {
+                    nextImage();
+                }
+            }
+        });
+
+    </script>
+    <!-- 禁止图片下载：右键菜单、拖拽、快捷键、开发者工具 -->
+    <script>
+    (function() {
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && (e.key === 's' || e.key === 'S')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); return false; }
+            if (e.key === 'F12') { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
+        });
+        function setImgNotDraggable() {
+            document.querySelectorAll('img').forEach(function(img) {
+                img.setAttribute('draggable', 'false');
+                img.setAttribute('oncontextmenu', 'return false');
+                img.setAttribute('ondragstart', 'return false');
+            });
+        }
+        setImgNotDraggable();
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) {
+                        if (node.tagName === 'IMG') {
+                            node.setAttribute('draggable', 'false');
+                            node.setAttribute('oncontextmenu', 'return false');
+                            node.setAttribute('ondragstart', 'return false');
+                        }
+                        node.querySelectorAll && node.querySelectorAll('img').forEach(function(img) {
+                            img.setAttribute('draggable', 'false');
+                            img.setAttribute('oncontextmenu', 'return false');
+                            img.setAttribute('ondragstart', 'return false');
+                        });
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    })();
+    </script>
+</body></html>
