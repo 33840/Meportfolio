@@ -452,19 +452,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-3">
-                        <button id="tab-inspiration" class="px-5 py-2 bg-black text-white border border-black rounded-full text-sm font-medium hover:bg-gray-100 transition" onclick="showTab('inspiration')">信息整理和草图</button>
-                        <button id="tab-video" class="px-5 py-2 bg-white border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-100 transition" onclick="showTab('video')">作品</button>
-                    </div>
-                    <div id="inspiration-content" class="mt-8">
-                        <div class="flex flex-row overflow-x-auto gap-6 pb-4 items-center">
-                            <img src="../img/5/xinxishuli1.png" alt="xinxishuli1" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                            <img src="../img/5/xinxishuli2.png" alt="xinxishuli2" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                            <img src="../img/5/caotu01.jpg" alt="caotu01" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                            <img src="../img/5/caotu02.jpg" alt="caotu02" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                        </div>
-                    </div>
-                    <div id="gallery-section" class="hidden flex flex-row overflow-x-auto gap-6 mt-8 pb-4 items-center">
+                    <div id="gallery-section" class="flex flex-row overflow-x-auto gap-6 mt-8 pb-4 items-center">
                             <img src="../img/21/2/1.jpg" alt="zuopin1" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
                             <img src="../img/21/2/2.jpg" alt="zuopin2" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
                             <img src="../img/21/2/3.jpg" alt="zuopin1" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
@@ -490,7 +478,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-6 md:mb-0">
                     <h3 class="text-2xl font-bold">Wang Yutong</h3>
-                    <p class="text-gray-400 mt-2">A designer crafting digital experiences.</p>
+                    <p class="text-gray-400 mt-2">Form follows function.</p>
                 </div>
                 
                 <div class="flex space-x-6">
@@ -510,7 +498,7 @@
             </div>
             
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-                <p>© 2025 Wang Yutong. All rights reserved.</p>
+                <p>© 2026 Wang Yutong. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -591,8 +579,22 @@
             
             // 使用 GSAP 添加更复杂的动画
             if (typeof gsap !== 'undefined') {
-                // 简介区域动画
-                gsap.from('section:nth-of-type(1) p', {
+                // 标题和简介动画
+                gsap.from('section:first-of-type h1', {
+                    opacity: 0,
+                    y: 50,
+                    duration: 1,
+                    delay: 0.2
+                });
+                
+                gsap.from('section:first-of-type .flex', {
+                    opacity: 0,
+                    y: 30,
+                    duration: 1,
+                    delay: 0.5
+                });
+                
+                gsap.from('section:first-of-type p', {
                     opacity: 0,
                     y: 20,
                     duration: 1,
@@ -1047,41 +1049,6 @@
             }
         });
 
-
-        function showTab(tab) {
-            const contents = {
-                'inspiration': 'inspiration-content'
-            };
-            const buttons = {
-                'inspiration': 'tab-inspiration',
-                'video': 'tab-video'
-            };
-            const gallery = document.getElementById('gallery-section');
-            Object.keys(contents).forEach(function(key) {
-                const el = document.getElementById(contents[key]);
-                const btn = document.getElementById(buttons[key]);
-                if (key === tab) {
-                    el.classList.remove('hidden');
-                    btn.classList.add('bg-black', 'text-white', 'border-black');
-                    btn.classList.remove('bg-white', 'border-gray-300');
-                } else {
-                    el.classList.add('hidden');
-                    btn.classList.remove('bg-black', 'text-white', 'border-black');
-                    btn.classList.add('bg-white', 'border-gray-300');
-                }
-            });
-            // 作品tab按钮状态 + 图片画廊显示控制
-            const videoBtn = document.getElementById('tab-video');
-            if (tab === 'video') {
-                gallery.classList.remove('hidden');
-                videoBtn.classList.add('bg-black', 'text-white', 'border-black');
-                videoBtn.classList.remove('bg-white', 'border-gray-300');
-            } else {
-                gallery.classList.add('hidden');
-                videoBtn.classList.remove('bg-black', 'text-white', 'border-black');
-                videoBtn.classList.add('bg-white', 'border-gray-300');
-            }
-        }
 
         function openFloatingPage() {
             const board = document.getElementById('floating-page');

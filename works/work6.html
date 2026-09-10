@@ -497,7 +497,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-6 md:mb-0">
                     <h3 class="text-2xl font-bold">Wang Yutong</h3>
-                    <p class="text-gray-400 mt-2">A designer crafting digital experiences.</p>
+                    <p class="text-gray-400 mt-2">Form follows function.</p>
                 </div>
                 
                 <div class="flex space-x-6">
@@ -517,7 +517,7 @@
             </div>
             
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-                <p>© 2025 Wang Yutong. All rights reserved.</p>
+                <p>© 2026 Wang Yutong. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -598,8 +598,22 @@
             
             // 使用 GSAP 添加更复杂的动画
             if (typeof gsap !== 'undefined') {
-                // 简介区域动画
-                gsap.from('section:nth-of-type(1) p', {
+                // 标题和简介动画
+                gsap.from('section:first-of-type h1', {
+                    opacity: 0,
+                    y: 50,
+                    duration: 1,
+                    delay: 0.2
+                });
+                
+                gsap.from('section:first-of-type .flex', {
+                    opacity: 0,
+                    y: 30,
+                    duration: 1,
+                    delay: 0.5
+                });
+                
+                gsap.from('section:first-of-type p', {
                     opacity: 0,
                     y: 20,
                     duration: 1,
@@ -772,11 +786,20 @@
             }
         });
 
-        // 鼠标滚轮：视频切换
+        // 鼠标滚轮：图片缩放 / 视频切换
         document.getElementById('image-viewer').addEventListener('wheel', function(e) {
             if (!this.classList.contains('active')) return;
             const item = viewerItems[viewerIndex];
-            if (item.type === 'video') {
+            if (item.type === 'image') {
+                // 图片：滚轮缩放（0.5x ~ 3x）
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    viewerScale = Math.min(viewerScale + 0.1, 3);
+                } else {
+                    viewerScale = Math.max(viewerScale - 0.1, 0.5);
+                }
+                document.getElementById('viewer-image').style.transform = 'scale(' + viewerScale + ')';
+            } else {
                 // 视频：滚轮切换
                 const isLast = viewerIndex === viewerItems.length - 1;
                 const isFirst = viewerIndex === 0;

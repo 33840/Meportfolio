@@ -213,6 +213,72 @@
             display: none;
         }
 
+        /* 查看器视频控制条 */
+        .viewer-video-controls {
+            position: absolute;
+            bottom: 8px;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 12px;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .viewer-video-wrap:hover .viewer-video-controls,
+        .viewer-video-controls:hover {
+            opacity: 1;
+        }
+        .viewer-video-wrap {
+            position: relative;
+            display: none;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        .viewer-video-wrap.active {
+            display: block;
+        }
+        .viewer-video-wrap video {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .viewer-video-btn {
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 8px;
+            transition: color 0.2s;
+        }
+        .viewer-video-btn:hover {
+            color: #93c5fd;
+        }
+        .viewer-vol-wrap {
+            position: relative;
+        }
+        .viewer-vol-popup {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            margin-bottom: 8px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 4px;
+            padding: 8px 4px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        .viewer-vol-wrap:hover .viewer-vol-popup {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         .image-viewer-close {
             position: absolute;
             top: 20px;
@@ -388,7 +454,16 @@
                             </div>
                         </div>
                     </div>
-                    <div id="gallery-section" class="flex flex-row overflow-x-auto gap-6 mt-8 pb-4 items-center">
+                    <div class="flex flex-wrap gap-3">
+                        <button id="tab-inspiration" class="px-5 py-2 bg-black text-white border border-black rounded-full text-sm font-medium hover:bg-gray-100 transition" onclick="showTab('inspiration')">前期调研</button>
+                        <button id="tab-video" class="px-5 py-2 bg-white border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-100 transition" onclick="showTab('video')">作品</button>
+                    </div>
+                    <div id="inspiration-content" class="mt-8">
+                        <div class="flex flex-row overflow-x-auto gap-6 pb-4 items-center">
+                            <img src="../img/3/erweima.png" alt="二维码" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                        </div>
+                    </div>
+                    <div id="gallery-section" class="hidden flex flex-row overflow-x-auto gap-6 mt-8 pb-4 items-center">
                             <img src="../img/3/zhanban1.jpg" alt="zhanban1" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
                             <img src="../img/3/zhanban2.jpg" alt="zhanban2" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
                             <img src="../img/3/zhanban3.jpg" alt="zhanban3" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
@@ -403,7 +478,7 @@
                         <a href="../index.html#portfolio" class="inline-flex items-center px-8 py-3 text-white font-medium border border-white rounded-md transition duration-300" style="background-image: url('../img/BGchakan.png'); background-size: cover; background-position: center;">
                             <i class="fa fa-home mr-2"></i>回到首页
                         </a>
-                        <a href="work4.html" class="inline-flex items-center px-8 py-3 bg-white text-black font-medium rounded-md transition duration-300">
+                        <a href="work8.html" class="inline-flex items-center px-8 py-3 bg-white text-black font-medium rounded-md transition duration-300">
                             下一个作品
                             <i class="fa fa-angle-right ml-2"></i>
                         </a>
@@ -419,7 +494,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-6 md:mb-0">
                     <h3 class="text-2xl font-bold">Wang Yutong</h3>
-                    <p class="text-gray-400 mt-2">A designer crafting digital experiences.</p>
+                    <p class="text-gray-400 mt-2">Form follows function.</p>
                 </div>
                 
                 <div class="flex space-x-6">
@@ -439,7 +514,7 @@
             </div>
             
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-                <p>© 2025 Wang Yutong. All rights reserved.</p>
+                <p>© 2026 Wang Yutong. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -452,6 +527,21 @@
                 <i class="fa fa-chevron-left"></i>
             </button>
             <img id="viewer-image" src="" alt="Large image view">
+            <div id="viewer-video-wrap" class="viewer-video-wrap">
+                <video id="viewer-video" src="" loop playsinline></video>
+                <div class="viewer-video-controls">
+                    <button class="viewer-video-btn" id="viewer-play-btn" onclick="viewerTogglePlay(event)"><i class="fa fa-play"></i></button>
+                    <span id="viewer-time" class="text-white text-xs font-mono">00:00 / 00:00</span>
+                    <input type="range" min="0" max="100" step="0.1" value="0" id="viewer-progress" class="progress-bar flex-1 cursor-pointer" oninput="viewerSeek(this.value)">
+                    <div class="viewer-vol-wrap">
+                        <button class="viewer-video-btn" id="viewer-vol-icon" onclick="viewerToggleMute(event)"><i class="fa fa-volume-down"></i></button>
+                        <div class="viewer-vol-popup">
+                            <input type="range" min="0" max="1" step="0.01" value="0.5" id="viewer-vol-slider" class="volume-slider cursor-pointer" oninput="viewerSetVolume(this.value)">
+                        </div>
+                    </div>
+                    <button class="viewer-video-btn" onclick="viewerToggleFullscreen(event)"><i class="fa fa-expand"></i></button>
+                </div>
+            </div>
             <button class="viewer-nav viewer-next" onclick="nextImage()" title="下一张">
                 <i class="fa fa-chevron-right"></i>
             </button>
@@ -505,8 +595,22 @@
             
             // 使用 GSAP 添加更复杂的动画
             if (typeof gsap !== 'undefined') {
-                // 简介区域动画
-                gsap.from('section:nth-of-type(1) p', {
+                // 标题和简介动画
+                gsap.from('section:first-of-type h1', {
+                    opacity: 0,
+                    y: 50,
+                    duration: 1,
+                    delay: 0.2
+                });
+                
+                gsap.from('section:first-of-type .flex', {
+                    opacity: 0,
+                    y: 30,
+                    duration: 1,
+                    delay: 0.5
+                });
+                
+                gsap.from('section:first-of-type p', {
                     opacity: 0,
                     y: 20,
                     duration: 1,
@@ -532,43 +636,61 @@
             const imgEl = e.target;
             const container = imgEl.parentElement;
             const images = Array.from(container.querySelectorAll('img'));
-
+            
             // 构建item列表
             viewerItems = images.map(function(img) {
                 return { type: 'image', src: img.src };
             });
-
+            
             viewerIndex = images.indexOf(imgEl);
-
+            
             const viewer = document.getElementById('image-viewer');
             const viewerImage = document.getElementById('viewer-image');
+            const viewerVideo = document.getElementById('viewer-video');
             const sidebar = document.getElementById('viewer-sidebar');
-
+            
             // 初始化显示
             viewerImage.src = viewerItems[viewerIndex].src;
+            viewerImage.classList.remove('hidden');
+            viewerVideo.classList.remove('active');
+            viewerVideo.pause();
+            viewerVideo.src = '';
             viewerScale = 1;
             viewerImage.style.transform = 'scale(1)';
-
+            
             // 构建缩略图侧边栏
             sidebar.innerHTML = '';
             viewerItems.forEach(function(item, i) {
                 const wrap = document.createElement('div');
                 wrap.className = 'viewer-thumb-wrap';
-
-                const thumb = document.createElement('img');
-                thumb.src = item.src;
-                thumb.className = 'viewer-thumb';
-                wrap.appendChild(thumb);
-
+                
+                if (item.type === 'video') {
+                    // 视频缩略图使用深色背景+播放图标
+                    const thumb = document.createElement('div');
+                    thumb.className = 'viewer-thumb';
+                    thumb.style.background = '#222';
+                    wrap.appendChild(thumb);
+                    
+                    const icon = document.createElement('i');
+                    icon.className = 'fa fa-play play-icon';
+                    wrap.appendChild(icon);
+                } else {
+                    const thumb = document.createElement('img');
+                    thumb.src = item.src;
+                    thumb.className = 'viewer-thumb';
+                    wrap.appendChild(thumb);
+                }
+                
                 if (i === viewerIndex) {
                     wrap.querySelector('.viewer-thumb').classList.add('active');
                 }
                 wrap.onclick = function() { viewerIndex = i; showViewerItem(); };
                 sidebar.appendChild(wrap);
             });
-
+            
             viewer.classList.add('active');
             document.body.style.overflow = 'hidden';
+            // 婊氬姩鍒板綋鍓嶇缉鐣ュ浘
             requestAnimationFrame(function() {
                 const activeWrap = sidebar.children[viewerIndex];
                 if (activeWrap) {
@@ -579,13 +701,32 @@
         
         function showViewerItem() {
             const viewerImage = document.getElementById('viewer-image');
+            const viewerVideo = document.getElementById('viewer-video');
+            const viewerVideoWrap = document.getElementById('viewer-video-wrap');
             const sidebar = document.getElementById('viewer-sidebar');
             const item = viewerItems[viewerIndex];
-
-            viewerImage.src = item.src;
-            viewerScale = 1;
-            viewerImage.style.transform = 'scale(1)';
-
+            
+            if (item.type === 'video') {
+                viewerImage.classList.add('hidden');
+                viewerVideoWrap.classList.add('active');
+                viewerVideo.src = item.src;
+                viewerVideo.volume = 0.5;
+                // 初始化音量滑块
+                const volSlider = document.getElementById('viewer-vol-slider');
+                volSlider.value = 0.5;
+                updateViewerSliderBg(0.5);
+                // 初始化播放按钮
+                document.getElementById('viewer-play-btn').innerHTML = '<i class="fa fa-play"></i>';
+            } else {
+                viewerVideoWrap.classList.remove('active');
+                viewerVideo.pause();
+                viewerVideo.src = '';
+                viewerImage.src = item.src;
+                viewerImage.classList.remove('hidden');
+                viewerScale = 1;
+                viewerImage.style.transform = 'scale(1)';
+            }
+            
             // 更新缩略图高亮
             const thumbs = sidebar.querySelectorAll('.viewer-thumb');
             thumbs.forEach(function(thumb, i) {
@@ -614,7 +755,10 @@
         
         function closeImageViewer() {
             const viewer = document.getElementById('image-viewer');
+            const viewerVideo = document.getElementById('viewer-video');
             viewer.classList.remove('active');
+            viewerVideo.pause();
+            viewerVideo.src = '';
             document.body.style.overflow = 'auto';
         }
         
@@ -639,6 +783,117 @@
             }
         });
 
+        // 鼠标滚轮：视频切换
+        document.getElementById('image-viewer').addEventListener('wheel', function(e) {
+            if (!this.classList.contains('active')) return;
+            const item = viewerItems[viewerIndex];
+            if (item.type === 'video') {
+                // 视频：滚轮切换
+                const isLast = viewerIndex === viewerItems.length - 1;
+                const isFirst = viewerIndex === 0;
+                if (e.deltaY > 0 && !isLast) {
+                    e.preventDefault();
+                    nextImage();
+                } else if (e.deltaY < 0 && !isFirst) {
+                    e.preventDefault();
+                    prevImage();
+                }
+            }
+        }, { passive: false });
+
+        // ===== 查看器视频控制 =====
+        function viewerTogglePlay(e) {
+            e.stopPropagation();
+            const video = document.getElementById('viewer-video');
+            const btn = document.getElementById('viewer-play-btn');
+            if (video.paused) {
+                video.play();
+                btn.innerHTML = '<i class="fa fa-pause"></i>';
+            } else {
+                video.pause();
+                btn.innerHTML = '<i class="fa fa-play"></i>';
+            }
+        }
+
+        function viewerSeek(val) {
+            const video = document.getElementById('viewer-video');
+            if (video.duration) {
+                video.currentTime = (parseFloat(val) / 100) * video.duration;
+            }
+        }
+
+        function viewerSetVolume(val) {
+            const video = document.getElementById('viewer-video');
+            video.volume = parseFloat(val);
+            video.muted = (video.volume === 0);
+            updateViewerSliderBg(val);
+            updateViewerVolIcon(video.volume);
+        }
+
+        function viewerToggleMute(e) {
+            e.stopPropagation();
+            const video = document.getElementById('viewer-video');
+            const slider = document.getElementById('viewer-vol-slider');
+            if (video.muted || video.volume === 0) {
+                video.muted = false;
+                video.volume = 0.5;
+                slider.value = 0.5;
+            } else {
+                video.muted = true;
+                video.volume = 0;
+                slider.value = 0;
+            }
+            updateViewerSliderBg(slider.value);
+            updateViewerVolIcon(video.volume);
+        }
+
+        function updateViewerSliderBg(val) {
+            const slider = document.getElementById('viewer-vol-slider');
+            const percent = parseFloat(val) * 100;
+            slider.style.background = 'linear-gradient(to top, #1e3a8a 0%, #1e3a8a ' + percent + '%, rgba(255,255,255,0.3) ' + percent + '%, rgba(255,255,255,0.3) 100%)';
+        }
+
+        function updateViewerVolIcon(vol) {
+            const icon = document.getElementById('viewer-vol-icon');
+            if (vol === 0) {
+                icon.innerHTML = '<i class="fa fa-volume-off"></i>';
+            } else if (vol < 0.5) {
+                icon.innerHTML = '<i class="fa fa-volume-down"></i>';
+            } else {
+                icon.innerHTML = '<i class="fa fa-volume-up"></i>';
+            }
+        }
+
+        function viewerToggleFullscreen(e) {
+            e.stopPropagation();
+            const wrap = document.getElementById('viewer-video-wrap');
+            if (!document.fullscreenElement) {
+                wrap.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // 视频事件监听
+        document.addEventListener('DOMContentLoaded', function() {
+            const vVideo = document.getElementById('viewer-video');
+            if (vVideo) {
+                vVideo.addEventListener('timeupdate', function() {
+                    const progress = document.getElementById('viewer-progress');
+                    const timeDisplay = document.getElementById('viewer-time');
+                    if (vVideo.duration) {
+                        progress.value = (vVideo.currentTime / vVideo.duration) * 100;
+                        const cur = formatTime(vVideo.currentTime);
+                        const dur = formatTime(vVideo.duration);
+                        timeDisplay.textContent = cur + ' / ' + dur;
+                    }
+                });
+                vVideo.addEventListener('ended', function() {
+                    document.getElementById('viewer-play-btn').innerHTML = '<i class="fa fa-play"></i>';
+                });
+            }
+        });
+
         // ===== 画板功能 =====
         let canvas, ctx;
         let isDrawing = false;
@@ -646,6 +901,36 @@
         let currentSize = 3;
         let isEraser = false;
         let lastX = 0, lastY = 0;
+
+        // 格式化时间
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        function showTab(tab) {
+            const inspirationContent = document.getElementById('inspiration-content');
+            const gallery = document.getElementById('gallery-section');
+            const btnInspiration = document.getElementById('tab-inspiration');
+            const btnVideo = document.getElementById('tab-video');
+
+            if (tab === 'inspiration') {
+                inspirationContent.classList.remove('hidden');
+                gallery.classList.add('hidden');
+                btnInspiration.classList.add('bg-black', 'text-white', 'border-black');
+                btnInspiration.classList.remove('bg-white', 'border-gray-300');
+                btnVideo.classList.remove('bg-black', 'text-white', 'border-black');
+                btnVideo.classList.add('bg-white', 'border-gray-300');
+            } else {
+                inspirationContent.classList.add('hidden');
+                gallery.classList.remove('hidden');
+                btnVideo.classList.add('bg-black', 'text-white', 'border-black');
+                btnVideo.classList.remove('bg-white', 'border-gray-300');
+                btnInspiration.classList.remove('bg-black', 'text-white', 'border-black');
+                btnInspiration.classList.add('bg-white', 'border-gray-300');
+            }
+        }
 
         function openFloatingPage() {
             const board = document.getElementById('floating-page');

@@ -425,57 +425,42 @@
 
     <!-- 主要内容 -->
     <main class="pt-16 pb-16">
-        <!-- 作品标题和简介 -->
-        <section class="pt-16 pb-12">
+        <!-- 作品简介 -->
+        <section class="py-12">
             <div class="container mx-auto px-4">
                 <div class="max-w-5xl mx-auto">
-                    <h1 class="text-3xl md:text-5xl font-bold mb-4">福安印象</h1>
-                    <div class="flex flex-wrap gap-2 mb-6">
-                        <span class="px-4 py-2 bg-gray-200 rounded-full text-sm">插画设计</span>
-                        <span class="px-4 py-2 bg-gray-200 rounded-full text-sm">2025</span>
+                    <h1 class="text-4xl md:text-6xl font-bold text-primary mb-4">福安印象</h1>
+                    <div class="flex flex-wrap gap-2 mb-8">
+                        <span class="px-4 py-2 bg-gray-100 rounded-full text-secondary text-sm">插画设计</span>
+                        <span class="px-4 py-2 bg-gray-100 rounded-full text-secondary text-sm">2025</span>
                     </div>
                     <div class="flex flex-col md:flex-row gap-16 mb-8">
                         <div class="md:w-2/3">
                             <p class="text-gray-600 text-base text-justify text-justify-last:text-left" style="text-align: justify; text-align-last: left;">
-                               福安印象插画设计围绕云南省昆明市晋宁区福安村的花灯、刺绣、秧佬鼓舞展开，旨在以现代设计语言展现传统民俗魅力，画面采用简洁明快的几何图形与鲜明色彩，构建出具有秩序感与视觉冲击力的场景，一方面保留民俗文化的原汁原味，另一方面以现代简约的视觉风格让传统民俗文化更契合当代审美吸引大众关注，助力福安村特色民俗文化的传播与传承，也为乡村文化发展与旅游推广提供具有辨识度的视觉符号。
+                                福安印象插画设计围绕云南省昆明市晋宁区福安村的花灯、刺绣、秧佬鼓舞展开，旨在以现代设计语言展现传统民俗魅力，画面采用简洁明快的几何图形与鲜明色彩，构建出具有秩序感与视觉冲击力的场景，一方面保留民俗文化的原汁原味，另一方面以现代简约的视觉风格让传统民俗文化更契合当代审美吸引大众关注，助力福安村特色民俗文化的传播与传承，也为乡村文化发展与旅游推广提供具有辨识度的视觉符号。
+                            </p>
                         </div>
                         <div class="md:w-1/3">
                             <h3 class="text-xl font-semibold mb-4">工具使用</h3>
                             <div class="flex flex-wrap gap-2">
-                                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">Procreate</span>
+                                <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">procreate</span>
                                 <span class="px-3 py-1 bg-gray-100 rounded-full text-sm">Adobe Illustrator</span>
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-wrap gap-3">
-                        <button id="tab-inspiration" class="px-5 py-2 bg-black text-white border border-black rounded-full text-sm font-medium hover:bg-gray-100 transition" onclick="showTab('inspiration')">前期调研</button>
-                        <button id="tab-video" class="px-5 py-2 bg-white border border-gray-300 rounded-full text-sm font-medium hover:bg-gray-100 transition" onclick="showTab('video')">作品</button>
-                    </div>
-                    <div id="inspiration-content" class="mt-8">
-                        <div class="flex flex-row overflow-x-auto gap-6 pb-4 items-center">
-                            <img src="../img/7/diaoyan (1).png" alt="yunlingxinxi0" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                            <img src="../img/7/diaoyan (2).png" alt="yunlingxinxi1" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                            <img src="../img/7/diaoyan (3).png" alt="yunlingxinxi2" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                            <img src="../img/7/diaoyan (4).png" alt="yunlingxinxi3" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                            <img src="../img/7/diaoyan (5).png" alt="yunlingxinxi4" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                            <img src="../img/7/diaoyan (6).png" alt="yunlingxinxi5" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                        </div>
-                    </div>
-                    <div id="gallery-section" class="hidden flex flex-row overflow-x-auto gap-6 mt-8 pb-4 items-center">
-                        <img src="../img/7/zuopin1.jpg" alt="yunlingbencaozhi-1" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                        <img src="../img/7/zuopin2.jpg" alt="yunlingbencaozhi-2" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                        <img src="../img/7/zuopin3.jpg" alt="yunlingbencaozhi-3" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                        <img src="../img/7/zuopin4.jpg" alt="yunlingbencaozhi-1" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                        <img src="../img/7/zuopin5.jpg" alt="yunlingbencaozhi-2" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                        <img src="../img/7/zuopin6.jpg" alt="yunlingbencaozhi-3" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
-                    </div>
-                    <div id="video-section" class="hidden mt-8">
+                    <div id="gallery-section" class="flex flex-row overflow-x-auto gap-6 mt-8 pb-4 items-center">
+                            <img src="../img/7/zuopin1.jpg" alt="zuopin-01" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/7/zuopin2.jpg" alt="zuopin-02" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/7/zuopin3.jpg" alt="zuopin-03" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/7/zuopin4.jpg" alt="zuopin-01" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/7/zuopin5.jpg" alt="zuopin-02" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
+                            <img src="../img/7/zuopin6.jpg" alt="zuopin-03" loading="lazy" class="flex-shrink-0 h-[70vh] w-auto rounded-lg shadow-md cursor-pointer hover:opacity-90 transition" onclick="openImageViewer(event)">
                     </div>
                     <div class="flex justify-center gap-4 mt-8">
                         <a href="../index.html#portfolio" class="inline-flex items-center px-8 py-3 text-white font-medium border border-white rounded-md transition duration-300" style="background-image: url('../img/BGchakan.png'); background-size: cover; background-position: center;">
                             <i class="fa fa-home mr-2"></i>回到首页
                         </a>
-                        <a href="work8.html" class="inline-flex items-center px-8 py-3 bg-white text-black font-medium rounded-md transition duration-300">
+                        <a href="work7.html" class="inline-flex items-center px-8 py-3 bg-white text-black font-medium rounded-md transition duration-300">
                             下一个作品
                             <i class="fa fa-angle-right ml-2"></i>
                         </a>
@@ -491,7 +476,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-6 md:mb-0">
                     <h3 class="text-2xl font-bold">Wang Yutong</h3>
-                    <p class="text-gray-400 mt-2">A designer crafting digital experiences.</p>
+                    <p class="text-gray-400 mt-2">Form follows function.</p>
                 </div>
                 
                 <div class="flex space-x-6">
@@ -511,7 +496,7 @@
             </div>
             
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-                <p>© 2025 Wang Yutong. All rights reserved.</p>
+                <p>© 2026 Wang Yutong. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -638,7 +623,7 @@
             viewerItems = images.map(function(img) {
                 return { type: 'image', src: img.src };
             });
-            
+
             viewerIndex = images.indexOf(imgEl);
             
             const viewer = document.getElementById('image-viewer');
@@ -780,11 +765,20 @@
             }
         });
 
-        // 鼠标滚轮：视频切换
+        // 鼠标滚轮：图片缩放 / 视频切换
         document.getElementById('image-viewer').addEventListener('wheel', function(e) {
             if (!this.classList.contains('active')) return;
             const item = viewerItems[viewerIndex];
-            if (item.type === 'video') {
+            if (item.type === 'image') {
+                // 图片：滚轮缩放（0.5x ~ 3x）
+                e.preventDefault();
+                if (e.deltaY < 0) {
+                    viewerScale = Math.min(viewerScale + 0.1, 3);
+                } else {
+                    viewerScale = Math.max(viewerScale - 0.1, 0.5);
+                }
+                document.getElementById('viewer-image').style.transform = 'scale(' + viewerScale + ')';
+            } else {
                 // 视频：滚轮切换
                 const isLast = viewerIndex === viewerItems.length - 1;
                 const isFirst = viewerIndex === 0;
@@ -910,7 +904,6 @@
         function toggleMute(e) {
             e.stopPropagation();
             const video = document.getElementById('yunling-video');
-            if (!video) return;
             const icon = document.getElementById('volume-icon');
             const slider = document.getElementById('volume-slider');
             video.muted = !video.muted;
@@ -933,7 +926,6 @@
         // 设置音量
         function setVolume(val) {
             const video = document.getElementById('yunling-video');
-            if (!video) return;
             const icon = document.getElementById('volume-icon');
             video.volume = parseFloat(val);
             video.muted = (video.volume === 0);
@@ -952,7 +944,6 @@
         function togglePlayPause(e) {
             e.stopPropagation();
             const video = document.getElementById('yunling-video');
-            if (!video) return;
             const btn = document.getElementById('play-pause-btn');
             const icon = btn.querySelector('i');
             if (video.paused) {
@@ -968,7 +959,7 @@
         function seekVideo(val) {
             const video = document.getElementById('yunling-video');
             const progressBar = document.getElementById('progress-bar');
-            if (video && video.duration) {
+            if (video.duration) {
                 const percent = parseFloat(val) / 100;
                 video.currentTime = video.duration * percent;
             }
@@ -984,18 +975,16 @@
 
         // 视频时间更新时同步进度条和时间显示
         const yunlingVideo = document.getElementById('yunling-video');
-        if (yunlingVideo) {
-            yunlingVideo.addEventListener('timeupdate', function() {
-                const progressBar = document.getElementById('progress-bar');
-                const timeDisplay = document.getElementById('time-display');
-                if (yunlingVideo.duration) {
-                    const percent = (yunlingVideo.currentTime / yunlingVideo.duration) * 100;
-                    progressBar.value = percent;
-                    updateProgressBackground(percent);
-                    timeDisplay.textContent = formatTime(yunlingVideo.currentTime) + ' / ' + formatTime(yunlingVideo.duration);
-                }
-            });
-        }
+        yunlingVideo.addEventListener('timeupdate', function() {
+            const progressBar = document.getElementById('progress-bar');
+            const timeDisplay = document.getElementById('time-display');
+            if (yunlingVideo.duration) {
+                const percent = (yunlingVideo.currentTime / yunlingVideo.duration) * 100;
+                progressBar.value = percent;
+                updateProgressBackground(percent);
+                timeDisplay.textContent = formatTime(yunlingVideo.currentTime) + ' / ' + formatTime(yunlingVideo.duration);
+            }
+        });
 
         // 格式化时间
         function formatTime(seconds) {
@@ -1008,7 +997,6 @@
         function toggleSpeedMenu(e) {
             e.stopPropagation();
             const video = document.getElementById('yunling-video');
-            if (!video) return;
             const display = document.getElementById('speed-display');
             const speeds = [0.5, 0.7, 1, 1.25, 1.5, 2];
             const currentSpeed = video.playbackRate;
@@ -1025,16 +1013,14 @@
         }
 
         // 视频播放/暂停状态变化时更新按钮图标
-        if (yunlingVideo) {
-            yunlingVideo.addEventListener('play', function() {
-                const icon = document.querySelector('#play-pause-btn i');
-                if (icon) icon.className = 'fa fa-pause';
-            });
-            yunlingVideo.addEventListener('pause', function() {
-                const icon = document.querySelector('#play-pause-btn i');
-                if (icon) icon.className = 'fa fa-play';
-            });
-        }
+        yunlingVideo.addEventListener('play', function() {
+            const icon = document.querySelector('#play-pause-btn i');
+            icon.className = 'fa fa-pause';
+        });
+        yunlingVideo.addEventListener('pause', function() {
+            const icon = document.querySelector('#play-pause-btn i');
+            icon.className = 'fa fa-play';
+        });
 
         // 视频全屏切换
         function toggleFullscreen(e) {
@@ -1070,37 +1056,6 @@
             }
         });
 
-
-        function showTab(tab) {
-            const contents = {
-                'inspiration': 'inspiration-content',
-                'video': 'video-section'
-            };
-            const buttons = {
-                'inspiration': 'tab-inspiration',
-                'video': 'tab-video'
-            };
-            const gallery = document.getElementById('gallery-section');
-            Object.keys(contents).forEach(function(key) {
-                const el = document.getElementById(contents[key]);
-                const btn = document.getElementById(buttons[key]);
-                if (key === tab) {
-                    el.classList.remove('hidden');
-                    btn.classList.add('bg-black', 'text-white', 'border-black');
-                    btn.classList.remove('bg-white', 'border-gray-300');
-                } else {
-                    el.classList.add('hidden');
-                    btn.classList.remove('bg-black', 'text-white', 'border-black');
-                    btn.classList.add('bg-white', 'border-gray-300');
-                }
-            });
-            // 作品标签时同时显示图片画廊
-            if (tab === 'video') {
-                gallery.classList.remove('hidden');
-            } else {
-                gallery.classList.add('hidden');
-            }
-        }
 
         function openFloatingPage() {
             const board = document.getElementById('floating-page');
