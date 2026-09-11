@@ -287,7 +287,7 @@
                     <a href="#home" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Home</a>
                     <a href="#about" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">About</a>
                     <a href="#portfolio" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Portfolio</a>
-                    <a href="#contact" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Contact</a>
+                    <a href="#contact" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Message</a>
                 </div>
                 
                 <!-- 移动端菜单按钮 -->
@@ -846,16 +846,27 @@
                 });
             }
             
-            // ===== 留言板：留言保存在浏览器 localStorage，最新的在前 =====
+            // ===== 留言板：优先使用后端数据库接口（/api/messages）；服务器未启动时回退到本机 localStorage =====
             const MSG_KEY = 'WY_MESSAGES';
             const messageForm = document.getElementById('contact-form');
             const messageList = document.getElementById('message-list');
             const messageEmpty = document.getElementById('message-empty');
+            const submitBtn = messageForm ? messageForm.querySelector('button[type="submit"]') : null;
+            let serverOnline = null; // null=尚未探测；true/false=后端是否可用
 
-            function loadMessages() {
+            // 服务器不可用时显示的提示条
+            const offlineHint = document.createElement('p');
+            offlineHint.className = 'text-center text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md py-2 px-4 mb-4';
+            offlineHint.textContent = '后端服务器未启动，留言仅保存在本机；双击「启动留言板服务器.bat」后所有人可见。';
+            offlineHint.style.display = 'none';
+            if (messageList && messageList.parentNode) {
+                messageList.parentNode.insertBefore(offlineHint, messageList);
+            }
+
+            function loadLocalMessages() {
                 try { return JSON.parse(localStorage.getItem(MSG_KEY)) || []; } catch (e) { return []; }
             }
-            function saveMessages(list) {
+            function saveLocalMessages(list) {
                 localStorage.setItem(MSG_KEY, JSON.stringify(list));
             }
             function formatMsgTime(ts) {
@@ -863,21 +874,20 @@
                 const pad = function(n) { return String(n).padStart(2, '0'); };
                 return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
             }
-            function renderMessages() {
-                const list = loadMessages();
+            function renderMessages(list) {
                 messageList.innerHTML = '';
                 if (!list.length) {
                     messageEmpty.classList.remove('hidden');
-                    return;
+                } else {
+                    messageEmpty.classList.add('hidden');
                 }
-                messageEmpty.classList.add('hidden');
                 list.forEach(function(msg) {
                     const item = document.createElement('div');
                     item.className = 'bg-white p-6 rounded-lg shadow-sm flex gap-4';
                     // 头像（昵称首字）
                     const avatar = document.createElement('div');
                     avatar.className = 'w-10 h-10 rounded-full bg-black text-white flex items-center justify-center flex-shrink-0 font-medium';
-                    avatar.textContent = msg.name.charAt(0);
+                    avatar.textContent = (msg.name || '匿').charAt(0);
                     // 昵称 + 时间 + 内容（textContent 赋值，天然防注入）
                     const body = document.createElement('div');
                     body.className = 'flex-1 min-w-0';
@@ -901,6 +911,24 @@
                     messageList.appendChild(item);
                 });
             }
+            // 从后端拉取留言；失败时回退本机
+            function refreshMessages() {
+                return fetch('/api/messages')
+                    .then(function(res) {
+                        if (!res.ok) throw new Error('bad status');
+                        return res.json();
+                    })
+                    .then(function(data) {
+                        serverOnline = true;
+                        offlineHint.style.display = 'none';
+                        renderMessages((data && data.data) || []);
+                    })
+                    .catch(function() {
+                        serverOnline = false;
+                        offlineHint.style.display = 'block';
+                        renderMessages(loadLocalMessages());
+                    });
+            }
             if (messageForm) {
                 messageForm.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -910,13 +938,36 @@
                         alert('请输入留言内容');
                         return;
                     }
-                    const list = loadMessages();
-                    list.unshift({ name: name, text: text.slice(0, 500), time: Date.now() });
-                    saveMessages(list);
-                    messageForm.reset();
-                    renderMessages();
+                    if (submitBtn) { submitBtn.disabled = true; }
+                    // 提交到后端数据库；失败则回退保存在本机
+                    fetch('/api/messages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: name, text: text.slice(0, 500) })
+                    })
+                        .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+                        .then(function(r) {
+                            if (!r.ok || !r.data.success) { throw new Error((r.data && r.data.error) || '提交失败'); }
+                            serverOnline = true;
+                            offlineHint.style.display = 'none';
+                            messageForm.reset();
+                            return refreshMessages();
+                        })
+                        .catch(function(err) {
+                            // 后端不可用：回退 localStorage（直接双击打开网页时也能临时留言）
+                            const list = loadLocalMessages();
+                            list.unshift({ name: name, text: text.slice(0, 500), time: Date.now() });
+                            saveLocalMessages(list);
+                            serverOnline = false;
+                            offlineHint.style.display = 'block';
+                            messageForm.reset();
+                            renderMessages(list);
+                        })
+                        .finally(function() {
+                            if (submitBtn) { submitBtn.disabled = false; }
+                        });
                 });
-                renderMessages();
+                refreshMessages();
             }
 
             // 第二排滚动按钮
