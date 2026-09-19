@@ -21,7 +21,7 @@ from urllib.parse import urlparse, unquote
 ROOT = os.path.dirname(os.path.abspath(__file__))          # 网站根目录（本文件所在目录）
 DB_DIR = os.path.join(ROOT, 'data')                        # 数据库目录
 DB_PATH = os.path.join(DB_DIR, 'messages.db')              # SQLite 数据库文件
-HOST = '127.0.0.1'                                         # 仅本机访问；如需局域网访问可改为 '0.0.0.0'
+HOST = '0.0.0.0'                                           # 监听所有网卡，允许局域网/外部访问
 PORT = 8000                                                # 服务端口
 MAX_BODY_BYTES = 8192                                      # 请求体大小上限（防刷）
 MAX_NAME_LEN = 20                                          # 昵称最大长度
