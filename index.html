@@ -860,7 +860,7 @@
             // 服务器不可用时显示的提示条
             const offlineHint = document.createElement('p');
             offlineHint.className = 'text-center text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md py-2 px-4 mb-4';
-            offlineHint.textContent = '后端服务器未启动，留言仅保存在本机；双击「启动留言板服务器.bat」后所有人可见。';
+            offlineHint.textContent = '留言服务暂时不可用，留言仅保存在本机；请稍后刷新重试。';
             offlineHint.style.display = 'none';
             if (messageList && messageList.parentNode) {
                 messageList.parentNode.insertBefore(offlineHint, messageList);
