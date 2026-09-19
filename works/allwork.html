@@ -1,0 +1,504 @@
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作品展示 | Wang Yutong</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#111111',
+                        secondary: '#333333',
+                        accent: '#0066ff',
+                        light: '#f5f5f5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .nav-shadow {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ===== 自动轮播舞台 ===== */
+        .slideshow-stage {
+            position: relative;
+            width: 100%;
+            height: 62vh;
+            min-height: 360px;
+            cursor: pointer;
+        }
+        /* 暂停状态下中央显示的播放提示图标 */
+        .play-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            opacity: 0;
+            transition: opacity 0.25s, transform 0.25s;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .play-hint.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        /* 每张幻灯片叠放，默认透明 */
+        .slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+            pointer-events: none;
+        }
+        .slide.active {
+            opacity: 1;
+        }
+        .slide img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border: 8px solid #ffffff;
+            box-sizing: border-box;
+            border-radius: 2px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 指示点 */
+        .slide-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.2);
+            transition: background 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        .slide-dot.active {
+            background: #111111;
+            transform: scale(1.3);
+        }
+
+        /* ===== 图片放大查看器（lightbox） ===== */
+        .enlarge-viewer {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .enlarge-viewer.active {
+            display: flex;
+        }
+        .enlarge-viewer img {
+            max-width: 85%;
+            max-height: 82vh;
+            object-fit: contain;
+            border: 10px solid #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        .enlarge-close {
+            position: absolute;
+            top: 24px;
+            right: 32px;
+            color: #fff;
+            font-size: 36px;
+            cursor: pointer;
+            z-index: 10;
+            transition: opacity 0.2s;
+        }
+        .enlarge-close:hover {
+            opacity: 0.7;
+        }
+        /* 轮播右上角播放/暂停按钮（不与点击放大冲突） */
+        .slide-control-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 6;
+            transition: background 0.2s;
+        }
+        .slide-control-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        /* 禁止图片下载：禁止选中、禁止拖拽 */
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="text-primary font-sans" style="background-image: url('../img/BG3.png'); background-size: cover; background-position: center; background-attachment: fixed;">
+    <!-- 导航栏 -->
+    <nav id="navbar" class="fixed top-0 left-0 w-full bg-white bg-opacity-95 nav-shadow py-4 z-50">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="flex justify-between items-center">
+                <a href="../index.html" class="text-2xl font-bold text-primary">Wang Yutong</a>
+
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex ml-auto space-x-8">
+                    <a href="../index.html" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Home</a>
+                    <a href="../index.html#about" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">About</a>
+                    <a href="../index.html#portfolio" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Portfolio</a>
+                    <a href="../index.html#contact" class="px-4 py-2 rounded text-secondary hover:bg-black hover:text-white transition-colors">Message</a>
+                </div>
+
+                <!-- 移动端菜单按钮 -->
+                <button id="menu-toggle" class="md:hidden ml-auto text-primary focus:outline-none">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 移动端导航菜单 -->
+        <div id="mobile-menu" class="md:hidden bg-white hidden absolute top-full left-0 w-full border-t border-gray-100">
+            <div class="container mx-auto px-4 py-4">
+                <a href="../index.html" class="block py-2 text-secondary hover:text-accent">Home</a>
+                <a href="../index.html#about" class="block py-2 text-secondary hover:text-accent">About</a>
+                <a href="../index.html#portfolio" class="block py-2 text-secondary hover:text-accent">Portfolio</a>
+                <a href="../index.html#contact" class="block py-2 text-secondary hover:text-accent">Message</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容：自动轮播 -->
+    <main class="pt-16 pb-16">
+        <section class="pt-12 md:pt-16 pb-8">
+            <div class="container mx-auto px-4">
+                <div class="max-w-6xl mx-auto">
+
+                    <!-- 标题 -->
+                    <h1 class="text-3xl md:text-4xl font-bold mb-2 tracking-wider">作品展示</h1>
+                    <p class="text-gray-500 mb-8 md:mb-10">信息可视化设计、品牌设计、插画设计</p>
+
+                    <!-- 轮播舞台：全部作品图片（../img/allwork/）共11张，每张停留1.5秒，循环播放；点击图片可放大查看，右上角按钮可暂停/继续 -->
+                    <div class="slideshow-stage" id="slideshow-stage">
+                        <div class="slide active">
+                            <img src="../img/allwork/1 (1).jpg" alt="全部作品1">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/allwork/1 (2).jpg" alt="全部作品2">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/allwork/1 (3).jpg" alt="全部作品3">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/allwork/1 (4).jpg" alt="全部作品4">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/allwork/1 (5).jpg" alt="全部作品5">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/allwork/1 (6).jpg" alt="全部作品6">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/allwork/1 (7).jpg" alt="全部作品7">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/allwork/1 (8).jpg" alt="全部作品8">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/allwork/1 (9).jpg" alt="全部作品9">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/allwork/1 (10).jpg" alt="全部作品10">
+                        </div>
+                        <div class="slide">
+                            <img src="../img/allwork/1 (11).jpg" alt="全部作品11">
+                        </div>
+                        <!-- 暂停时中央显示播放图标（仅视觉提示） -->
+                        <div class="play-hint" id="play-hint">
+                            <i class="fa fa-play"></i>
+                        </div>
+                        <!-- 右上角播放/暂停按钮 -->
+                        <div class="slide-control-btn" id="slide-control-btn" title="暂停/播放">
+                            <i class="fa fa-pause"></i>
+                        </div>
+                    </div>
+
+                    <!-- 指示点 -->
+                    <div id="slideshow-dots" class="flex justify-center gap-2 mt-6"></div>
+
+                    <!-- 返回作品页 -->
+                    <div class="text-center mt-8">
+                        <a href="../index.html#portfolio" class="inline-block px-6 py-2.5 rounded-full border border-black font-medium bg-black text-white hover:opacity-90 transition-colors">
+                            返回作品集
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="py-12 bg-black text-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <h3 class="text-2xl font-bold">Wang Yutong</h3>
+                    <p class="text-gray-400 mt-2">Form follows function.</p>
+                </div>
+
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-behance text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-dribbble text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                        <i class="fa fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
+                <p>© 2026 Wang Yutong. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 图片放大查看器：点击图片打开，跟随轮播自动切换；点击背景或关闭按钮关闭 -->
+    <div id="enlarge-viewer" class="enlarge-viewer">
+        <span class="enlarge-close" id="enlarge-close">&times;</span>
+        <img id="enlarge-img" src="" alt="放大查看">
+    </div>
+
+    <script>
+        // 移动端菜单切换
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // ===== 图片自动轮播：每张停顿 1.5 秒，淡入淡出，循环播放 =====
+            const slides = Array.from(document.querySelectorAll('.slide'));
+            const dotsWrap = document.getElementById('slideshow-dots');
+            const SLIDE_INTERVAL = 1500; // 每张图片停留 1.5 秒
+            let current = 0;
+
+            // 生成指示点
+            slides.forEach(function(_, i) {
+                const dot = document.createElement('span');
+                dot.className = 'slide-dot' + (i === 0 ? ' active' : '');
+                dot.addEventListener('click', function() {
+                    goToSlide(i);
+                });
+                dotsWrap.appendChild(dot);
+            });
+            const dots = Array.from(dotsWrap.children);
+
+            function goToSlide(index) {
+                slides[current].classList.remove('active');
+                dots[current].classList.remove('active');
+                current = (index + slides.length) % slides.length; // 循环
+                slides[current].classList.add('active');
+                dots[current].classList.add('active');
+                // 放大查看器打开时，同步切换到当前轮播图片
+                if (enlargeViewer && enlargeViewer.classList.contains('active')) {
+                    const curImg = slides[current].querySelector('img');
+                    if (curImg) enlargeImg.src = curImg.src;
+                }
+            }
+
+            // 预加载全部图片，避免切换时闪烁
+            slides.forEach(function(s) {
+                const img = s.querySelector('img');
+                if (img) {
+                    const preload = new Image();
+                    preload.src = img.src;
+                }
+            });
+
+            // ===== 点击图片：打开放大查看器（轮播继续自动播放，放大图跟随切换） =====
+            const stage = document.getElementById('slideshow-stage');
+            const playHint = document.getElementById('play-hint');
+            const controlBtn = document.getElementById('slide-control-btn');
+            const controlIcon = controlBtn.querySelector('i');
+            const enlargeViewer = document.getElementById('enlarge-viewer');
+            const enlargeImg = document.getElementById('enlarge-img');
+            const enlargeClose = document.getElementById('enlarge-close');
+            let timer = null;
+            let isPaused = false;
+
+            function startAutoPlay() {
+                if (timer) clearInterval(timer);
+                // 每张停留 SLIDE_INTERVAL 毫秒，末尾自动回到第一张
+                timer = setInterval(function() {
+                    goToSlide(current + 1);
+                }, SLIDE_INTERVAL);
+            }
+            function stopAutoPlay() {
+                clearInterval(timer);
+                timer = null;
+            }
+
+            // 切换暂停/播放状态（由右上角按钮触发）
+            function togglePlay() {
+                if (isPaused) {
+                    isPaused = false;
+                    playHint.classList.remove('show');
+                    controlIcon.className = 'fa fa-pause';
+                    startAutoPlay();
+                } else {
+                    isPaused = true;
+                    playHint.classList.add('show');
+                    controlIcon.className = 'fa fa-play';
+                    stopAutoPlay();
+                }
+            }
+
+            // 打开放大查看器：显示当前轮播图片
+            function openEnlargeViewer() {
+                const curImg = slides[current].querySelector('img');
+                if (curImg) enlargeImg.src = curImg.src;
+                enlargeViewer.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            // 关闭放大查看器
+            function closeEnlargeViewer() {
+                enlargeViewer.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // 点击舞台图片 → 打开放大查看器（不暂停轮播）
+            stage.addEventListener('click', function(e) {
+                // 点击右上角控制按钮时不触发放大
+                if (controlBtn.contains(e.target)) return;
+                openEnlargeViewer();
+            });
+
+            // 右上角按钮：暂停/播放
+            controlBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                togglePlay();
+            });
+
+            // 关闭按钮
+            enlargeClose.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeEnlargeViewer();
+            });
+            // 点击放大查看器空白区域关闭（图片本身不关闭）
+            enlargeViewer.addEventListener('click', function(e) {
+                if (e.target === enlargeViewer) closeEnlargeViewer();
+            });
+            // ESC 关闭
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && enlargeViewer.classList.contains('active')) {
+                    closeEnlargeViewer();
+                }
+            });
+
+            // 页面加载后启动自动播放
+            startAutoPlay();
+        });
+    </script>
+    <!-- 禁止图片下载：右键菜单、拖拽、快捷键、开发者工具 -->
+    <script>
+    (function() {
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && (e.key === 's' || e.key === 'S')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) { e.preventDefault(); return false; }
+            if (e.key === 'F12') { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
+        });
+        function setImgNotDraggable() {
+            document.querySelectorAll('img').forEach(function(img) {
+                img.setAttribute('draggable', 'false');
+                img.setAttribute('oncontextmenu', 'return false');
+                img.setAttribute('ondragstart', 'return false');
+            });
+        }
+        setImgNotDraggable();
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) {
+                        if (node.tagName === 'IMG') {
+                            node.setAttribute('draggable', 'false');
+                            node.setAttribute('oncontextmenu', 'return false');
+                            node.setAttribute('ondragstart', 'return false');
+                        }
+                        node.querySelectorAll && node.querySelectorAll('img').forEach(function(img) {
+                            img.setAttribute('draggable', 'false');
+                            img.setAttribute('oncontextmenu', 'return false');
+                            img.setAttribute('ondragstart', 'return false');
+                        });
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    })();
+    </script>
+</body>
+</html>
