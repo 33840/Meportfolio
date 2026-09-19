@@ -34,17 +34,17 @@ function getClientIp(req) {
   return req.headers['x-real-ip'] || '';
 }
 
-// 用 Node 内置 https 调用 Upstash REST API（兼容所有 Node 版本，不依赖全局 fetch）
-function upstash(command) {
+// 用 Node 内置 https 调用 Redis REST API（兼容所有 Node 版本，不依赖全局 fetch）
+function upstash(command, redisUrl, redisToken) {
   return new Promise((resolve, reject) => {
-    const fullUrl = process.env.UPSTASH_REDIS_REST_URL + '/' + command.map(encodeURIComponent).join('/');
+    const fullUrl = redisUrl + '/' + command.map(encodeURIComponent).join('/');
     const u = new URL(fullUrl);
     const options = {
       hostname: u.hostname,
       port: u.port || 443,
       path: u.pathname + u.search,
       method: 'GET',
-      headers: { Authorization: 'Bearer ' + process.env.UPSTASH_REDIS_REST_TOKEN },
+      headers: { Authorization: 'Bearer ' + redisToken },
     };
     const req = https.request(options, (res) => {
       let body = '';
@@ -85,16 +85,20 @@ module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
+  // 兼容两种环境变量命名：Upstash Redis (UPSTASH_*) 或 Vercel KV (KV_REST_API_*)
+  const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+  const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+
   try {
-    // 必须配置 Upstash Redis
-    if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    // 必须配置 Redis
+    if (!REDIS_URL || !REDIS_TOKEN) {
       res.statusCode = 500;
       res.end(JSON.stringify({ success: false, error: '留言服务未配置数据库环境变量' }));
       return;
     }
 
     if (req.method === 'GET') {
-      const items = await upstash(['lrange', REDIS_LIST_KEY, '0', String(MAX_MESSAGES - 1)]);
+      const items = await upstash(['lrange', REDIS_LIST_KEY, '0', String(MAX_MESSAGES - 1)], REDIS_URL, REDIS_TOKEN);
       const list = (items || []).map((raw) => {
         try { return JSON.parse(raw); } catch { return null; }
       }).filter(Boolean);
@@ -133,7 +137,7 @@ module.exports = async function handler(req, res) {
 
       // 同 IP 防刷：SET ... NX EX 10，返回 null 表示 10 秒内已提交过
       const ip = getClientIp(req);
-      const rateOk = await upstash(['set', 'rate:' + ip, '1', 'nx', 'ex', String(POST_INTERVAL_SEC)]);
+      const rateOk = await upstash(['set', 'rate:' + ip, '1', 'nx', 'ex', String(POST_INTERVAL_SEC)], REDIS_URL, REDIS_TOKEN);
       if (rateOk === null) {
         res.statusCode = 429;
         res.end(JSON.stringify({ success: false, error: '留言太频繁，请稍后再试' }));
@@ -141,8 +145,8 @@ module.exports = async function handler(req, res) {
       }
 
       const msg = { name, text, time: Date.now() };
-      await upstash(['lpush', REDIS_LIST_KEY, JSON.stringify(msg)]);
-      await upstash(['ltrim', REDIS_LIST_KEY, '0', String(MAX_MESSAGES - 1)]);
+      await upstash(['lpush', REDIS_LIST_KEY, JSON.stringify(msg)], REDIS_URL, REDIS_TOKEN);
+      await upstash(['ltrim', REDIS_LIST_KEY, '0', String(MAX_MESSAGES - 1)], REDIS_URL, REDIS_TOKEN);
       res.statusCode = 200;
       res.end(JSON.stringify({ success: true, data: msg }));
       return;
